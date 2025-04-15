@@ -14,6 +14,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarGroupLabel,
+  //SidebarGroupLabel, // Import missing
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -94,8 +95,19 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   );
 }
 
+const MENU_ITEMS = [
+    { name: 'Home', icon: 'home' },
+    { name: 'Add Patient', icon: 'plusCircle' },
+    { name: 'Search Patient', icon: 'search' },
+    { name: 'Vaccine Registration', icon: 'edit' },
+    { name: 'Print Vaccination History', icon: 'file' },
+    { name: 'National Vaccination Scheme', icon: 'workflow' },
+];
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState('Home');
+  const router = useRouter();
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -103,6 +115,29 @@ export default function Home() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+  };
+
+  const handleMenuSelect = (menuName: string) => {
+    setSelectedMenu(menuName);
+  };
+
+  const renderContent = () => {
+    switch (selectedMenu) {
+      case 'Home':
+        return <p>Welcome to the VacunaciónES application!</p>;
+      case 'Add Patient':
+        return <p>Add Patient form will be here.</p>;
+      case 'Search Patient':
+        return <p>Search Patient form will be here.</p>;
+      case 'Vaccine Registration':
+        return <p>Vaccine Registration form will be here.</p>;
+      case 'Print Vaccination History':
+        return <p>Print Vaccination History content will be here.</p>;
+      case 'National Vaccination Scheme':
+        return <p>National Vaccination Scheme content will be here.</p>;
+      default:
+        return <p>Welcome to the VacunaciónES application!</p>;
+    }
   };
 
   if (!isLoggedIn) {
@@ -139,7 +174,7 @@ export default function Home() {
         </nav>
         <div className="flex-1 p-4">
           {/* Main content area - replace with actual content */}
-          <p>Welcome to the VacunaciónES application!</p>
+          {renderContent()}
         </div>
       </div>
       <Sidebar collapsible="icon">
@@ -155,42 +190,19 @@ export default function Home() {
           <SidebarGroup>
             <SidebarGroupLabel>Menu</SidebarGroupLabel>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton >
-                  <Icons.home className="mr-2 h-4 w-4" />
-                  <span>Home</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Icons.plusCircle className="mr-2 h-4 w-4" />
-                  <span>Add Patient</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Icons.search className="mr-2 h-4 w-4" />
-                  <span>Search Patient</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Icons.edit className="mr-2 h-4 w-4" />
-                  <span>Vaccine Registration</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Icons.file className="mr-2 h-4 w-4" />
-                  <span>Print Vaccination History</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton>
-                  <Icons.workflow className="mr-2 h-4 w-4" />
-                  <span>National Vaccination Scheme</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {MENU_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton onClick={() => handleMenuSelect(item.name)}>
+                    {item.icon === 'home' && <Icons.home className="mr-2 h-4 w-4" />}
+                    {item.icon === 'plusCircle' && <Icons.plusCircle className="mr-2 h-4 w-4" />}
+                    {item.icon === 'search' && <Icons.search className="mr-2 h-4 w-4" />}
+                    {item.icon === 'edit' && <Icons.edit className="mr-2 h-4 w-4" />}
+                    {item.icon === 'file' && <Icons.file className="mr-2 h-4 w-4" />}
+                    {item.icon === 'workflow' && <Icons.workflow className="mr-2 h-4 w-4" />}
+                    <span>{item.name}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
