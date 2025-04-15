@@ -32,6 +32,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { validateDui } from "@/services/dui-validator";
 import { useToast } from "@/hooks/use-toast";
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
@@ -427,7 +437,70 @@ export default function Home() {
       case 'Print Vaccination History':
         return <p>Print Vaccination History content will be here.</p>;
       case 'National Vaccination Scheme':
-        return <p>National Vaccination Scheme content will be here.</p>;
+        return (
+          <div className="container mx-auto mt-8">
+            <h2 className="text-2xl font-bold mb-4">National Vaccination Scheme</h2>
+            <Table>
+              <TableCaption>Recommended vaccinations at different stages of life.</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[150px]">Age/Stage</TableHead>
+                  <TableHead>Vaccine</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">Recién Nacidos/as</TableCell>
+                  <TableCell>BCG, HB (Hepatitis B)</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">2, 4 y 6 meses</TableCell>
+                  <TableCell>Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">12 meses</TableCell>
+                  <TableCell>Triple viral tipo SPR, Refuerzo de Neumococo 13 Valente</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">15 meses</TableCell>
+                  <TableCell>Hepatitis A, Varicela</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">18 meses</TableCell>
+                  <TableCell>Hexavalente, Triple viral tipo SPR</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">24 meses</TableCell>
+                  <TableCell>Hepatitis A</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell className="font-medium">4 años</TableCell>
+                  <TableCell>DPT, Polio oral, Varicela</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell className="font-medium">Niños y Niñas de 9 y 10 años</TableCell>
+                  <TableCell>VPH Cuadrivalente</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell className="font-medium">Adolescentes y Adultos</TableCell>
+                  <TableCell>Td (Tétanos y Difteria)</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell className="font-medium">Mujeres Embarazadas</TableCell>
+                  <TableCell>Tdpa, Td, Influenza Tetravalente</TableCell>
+                </TableRow>
+                 <TableRow>
+                  <TableCell className="font-medium">Adultos Mayores, Grupos de Riesgo y Personas con Enfermedades Crónicas</TableCell>
+                  <TableCell>Td, HB (Hepatitis B), Neumococo 23 Valente, Influenza Tetravalente</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Otras Vacunas</TableCell>
+                  <TableCell>Fiebre Amarilla, Antirrábica Humana, SARS Cov-2</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        );
       default:
         return <p>Welcome to the VacunaciónES application!</p>;
     }
