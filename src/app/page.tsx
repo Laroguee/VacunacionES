@@ -117,8 +117,65 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
+   const [firstNameError, setFirstNameError] = useState("");
+   const [lastNameError, setLastNameError] = useState("");
+   const [duiError, setDuiError] = useState("");
+   const [dobError, setDobError] = useState("");
+   const [phoneError, setPhoneError] = useState("");
+   const [addressError, setAddressError] = useState("");
+
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    let hasErrors = false;
+
+    if (!firstName) {
+        setFirstNameError("First Name is required");
+        hasErrors = true;
+    } else {
+        setFirstNameError("");
+    }
+
+    if (!lastName) {
+        setLastNameError("Last Name is required");
+        hasErrors = true;
+    } else {
+        setLastNameError("");
+    }
+
+    if (!dui) {
+        setDuiError("DUI is required");
+        hasErrors = true;
+    } else {
+        setDuiError("");
+    }
+
+    if (!dob) {
+        setDobError("Date of Birth is required");
+        hasErrors = true;
+    } else {
+        setDobError("");
+    }
+
+    if (!phone) {
+        setPhoneError("Phone Number is required");
+        hasErrors = true;
+    } else {
+        setPhoneError("");
+    }
+
+    if (!address) {
+        setAddressError("Address is required");
+        hasErrors = true;
+    } else {
+        setAddressError("");
+    }
+
+    if (hasErrors) {
+        return;
+    }
+
 
     const duiValidationResult = await validateDui(dui);
     if (!duiValidationResult.isValid) {
@@ -163,26 +220,32 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
         <div>
           <Label htmlFor="firstName">First Name</Label>
           <Input type="text" id="firstName" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+           {firstNameError && <p className="text-red-500 text-xs">{firstNameError}</p>}
         </div>
         <div>
           <Label htmlFor="lastName">Last Name</Label>
           <Input type="text" id="lastName" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)}/>
+          {lastNameError && <p className="text-red-500 text-xs">{lastNameError}</p>}
         </div>
         <div>
           <Label htmlFor="dui">DUI (########-#)</Label>
           <Input type="text" id="dui" placeholder="########-#" value={dui} onChange={(e) => setDui(e.target.value)} />
+           {duiError && <p className="text-red-500 text-xs">{duiError}</p>}
         </div>
         <div>
           <Label htmlFor="dob">Date of Birth</Label>
           <Input type="date" id="dob" value={dob} onChange={(e) => setDob(e.target.value)}/>
+           {dobError && <p className="text-red-500 text-xs">{dobError}</p>}
         </div>
         <div>
           <Label htmlFor="phone">Phone Number</Label>
           <Input type="tel" id="phone" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)}/>
+           {phoneError && <p className="text-red-500 text-xs">{phoneError}</p>}
         </div>
         <div>
           <Label htmlFor="address">Address</Label>
           <Input type="text" id="address" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)}/>
+           {addressError && <p className="text-red-500 text-xs">{addressError}</p>}
         </div>
         <div className="md:col-span-2">
           <Button type="submit">Add Patient</Button>
