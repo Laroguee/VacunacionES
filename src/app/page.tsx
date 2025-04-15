@@ -13,6 +13,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -202,4 +203,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
