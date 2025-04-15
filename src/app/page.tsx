@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -31,6 +30,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { validateDui } from "@/services/dui-validator";
+import { useToast } from "@/hooks/use-toast";
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
@@ -102,39 +103,76 @@ const MENU_ITEMS = [
     { name: 'Add Patient', icon: 'plusCircle' },
     { name: 'Search Patient', icon: 'search' },
     { name: 'Vaccine Registration', icon: 'edit' },
-    { name: 'Print Vaccination History', icon: 'file' },
-    { name: 'National Vaccination Scheme', icon: 'workflow' },
+    { name: 'Print Vaccination History', icon: 'fileText' },
+    { name: 'National Vaccination Scheme', icon: 'slidersHorizontal' },
 ];
 
 // Add Patient Form Component
 function AddPatientForm() {
+  const { toast } = useToast();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dui, setDui] = useState("");
+  const [dob, setDob] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const duiValidationResult = await validateDui(dui);
+    if (!duiValidationResult.isValid) {
+      toast({
+        title: "Error",
+        description: duiValidationResult.errorMessage || "Invalid DUI",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Placeholder for actual form submission logic
+    console.log("Form submitted:", {
+      firstName,
+      lastName,
+      dui,
+      dob,
+      phone,
+      address,
+    });
+
+    toast({
+      title: "Success",
+      description: "Patient added successfully!",
+    });
+  };
+
   return (
     <div className="container mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Add New Patient</h2>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
         <div>
           <Label htmlFor="firstName">First Name</Label>
-          <Input type="text" id="firstName" placeholder="First Name" />
+          <Input type="text" id="firstName" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         </div>
         <div>
           <Label htmlFor="lastName">Last Name</Label>
-          <Input type="text" id="lastName" placeholder="Last Name" />
+          <Input type="text" id="lastName" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)}/>
         </div>
         <div>
           <Label htmlFor="dui">DUI (########-#)</Label>
-          <Input type="text" id="dui" placeholder="########-#" />
+          <Input type="text" id="dui" placeholder="########-#" value={dui} onChange={(e) => setDui(e.target.value)} />
         </div>
         <div>
           <Label htmlFor="dob">Date of Birth</Label>
-          <Input type="date" id="dob" />
+          <Input type="date" id="dob" value={dob} onChange={(e) => setDob(e.target.value)}/>
         </div>
         <div>
           <Label htmlFor="phone">Phone Number</Label>
-          <Input type="tel" id="phone" placeholder="Phone Number" />
+          <Input type="tel" id="phone" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)}/>
         </div>
         <div>
           <Label htmlFor="address">Address</Label>
-          <Input type="text" id="address" placeholder="Address" />
+          <Input type="text" id="address" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)}/>
         </div>
         <div className="md:col-span-2">
           <Button type="submit">Add Patient</Button>
@@ -146,17 +184,44 @@ function AddPatientForm() {
 
 // Search Patient Form Component
 function SearchPatientForm() {
+  const [searchName, setSearchName] = useState("");
+  const [searchDUI, setSearchDUI] = useState("");
+  const { toast } = useToast();
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    // Placeholder for actual search logic
+    console.log("Search submitted:", {
+      searchName,
+      searchDUI,
+    });
+
+    if (!searchName && !searchDUI) {
+      toast({
+        title: "Warning",
+        description: "Please enter a name or DUI to search.",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Patient found!",
+    });
+  };
+
   return (
     <div className="container mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6"  onSubmit={handleSubmit}>
         <div>
           <Label htmlFor="searchName">Name</Label>
-          <Input type="text" id="searchName" placeholder="Name" />
+          <Input type="text" id="searchName" placeholder="Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
         </div>
         <div>
           <Label htmlFor="searchDUI">DUI</Label>
-          <Input type="text" id="searchDUI" placeholder="DUI" />
+          <Input type="text" id="searchDUI" placeholder="DUI" value={searchDUI} onChange={(e) => setSearchDUI(e.target.value)} />
         </div>
         <div className="md:col-span-2">
           <Button type="submit">Search Patient</Button>
@@ -168,25 +233,56 @@ function SearchPatientForm() {
 
 // Vaccine Registration Form Component
 function VaccineRegistrationForm() {
+  const [patientName, setPatientName] = useState("");
+  const [vaccineType, setVaccineType] = useState("");
+  const [vaccineDate, setVaccineDate] = useState("");
+  const [nextAppointment, setNextAppointment] = useState("");
+  const { toast } = useToast();
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+
+    // Placeholder for actual vaccine registration logic
+    console.log("Vaccine registration submitted:", {
+      patientName,
+      vaccineType,
+      vaccineDate,
+      nextAppointment,
+    });
+
+    if (!patientName || !vaccineType || !vaccineDate) {
+      toast({
+        title: "Warning",
+        description: "Please fill in all fields.",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: "Vaccine registered successfully!",
+    });
+  };
+
   return (
     <div className="container mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Vaccine Registration</h2>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
         <div>
           <Label htmlFor="patientName">Patient Name</Label>
-          <Input type="text" id="patientName" placeholder="Patient Name" />
+          <Input type="text" id="patientName" placeholder="Patient Name" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
         </div>
         <div>
           <Label htmlFor="vaccineType">Vaccine Type</Label>
-          <Input type="text" id="vaccineType" placeholder="Vaccine Type" />
+          <Input type="text" id="vaccineType" placeholder="Vaccine Type" value={vaccineType} onChange={(e) => setVaccineType(e.target.value)}/>
         </div>
         <div>
           <Label htmlFor="vaccineDate">Vaccine Date</Label>
-          <Input type="date" id="vaccineDate" />
+          <Input type="date" id="vaccineDate" value={vaccineDate} onChange={(e) => setVaccineDate(e.target.value)}/>
         </div>
         <div>
           <Label htmlFor="nextAppointment">Next Appointment Date</Label>
-          <Input type="date" id="nextAppointment" />
+          <Input type="date" id="nextAppointment" value={nextAppointment} onChange={(e) => setNextAppointment(e.target.value)}/>
         </div>
         <div className="md:col-span-2">
           <Button type="submit">Register Vaccine</Button>
@@ -290,8 +386,8 @@ export default function Home() {
                     {item.icon === 'plusCircle' && <Icons.plusCircle className="mr-2 h-4 w-4" />}
                     {item.icon === 'search' && <Icons.search className="mr-2 h-4 w-4" />}
                     {item.icon === 'edit' && <Icons.edit className="mr-2 h-4 w-4" />}
-                    {item.icon === 'file' && <Icons.file className="mr-2 h-4 w-4" />}
-                    {item.icon === 'workflow' && <Icons.workflow className="mr-2 h-4 w-4" />}
+                    {item.icon === 'fileText' && <Icons.fileText className="mr-2 h-4 w-4" />}
+                    {item.icon === 'slidersHorizontal' && <Icons.slidersHorizontal className="mr-2 h-4 w-4" />}
                     <span>{item.name}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
