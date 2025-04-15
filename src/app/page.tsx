@@ -108,7 +108,7 @@ const MENU_ITEMS = [
 ];
 
 // Add Patient Form Component
-function AddPatientForm() {
+function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => void }) {
   const { toast } = useToast();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -116,20 +116,6 @@ function AddPatientForm() {
   const [dob, setDob] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-
-  useEffect(() => {
-    // Load data from local storage on component mount
-    const storedData = localStorage.getItem("patientData");
-    if (storedData) {
-      const parsedData = JSON.parse(storedData);
-      setFirstName(parsedData.firstName || "");
-      setLastName(parsedData.lastName || "");
-      setDui(parsedData.dui || "");
-      setDob(parsedData.dob || "");
-      setPhone(parsedData.phone || "");
-      setAddress(parsedData.address || "");
-    }
-  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -144,7 +130,7 @@ function AddPatientForm() {
       return;
     }
 
-    // Save data to local storage
+    // Create patient object
     const patientData = {
       firstName,
       lastName,
@@ -153,14 +139,21 @@ function AddPatientForm() {
       phone,
       address,
     };
-    localStorage.setItem("patientData", JSON.stringify(patientData));
 
-    console.log("Form submitted:", patientData);
+    onPatientAdded(patientData);
 
     toast({
       title: "Success",
       description: "Patient added successfully!",
     });
+
+    // Clear the form
+    setFirstName("");
+    setLastName("");
+    setDui("");
+    setDob("");
+    setPhone("");
+    setAddress("");
   };
 
   return (
@@ -200,51 +193,77 @@ function AddPatientForm() {
 }
 
 // Search Patient Form Component
-function SearchPatientForm() {
+function SearchPatientForm({ patients }: { patients: any[] }) {
   const [searchName, setSearchName] = useState("");
   const [searchDUI, setSearchDUI] = useState("");
   const { toast } = useToast();
+  const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+      event.preventDefault();
 
-    // Placeholder for actual search logic
-    console.log("Search submitted:", {
-      searchName,
-      searchDUI,
-    });
+      if (!searchName && !searchDUI) {
+          toast({
+              title: "Warning",
+              description: "Please enter a name or DUI to search.",
+          });
+          return;
+      }
 
-    if (!searchName && !searchDUI) {
-      toast({
-        title: "Warning",
-        description: "Please enter a name or DUI to search.",
-      });
-      return;
-    }
+      const results = patients.filter(patient =>
+          (searchName && (patient.firstName.toLowerCase().includes(searchName.toLowerCase()) || patient.lastName.toLowerCase().includes(searchName.toLowerCase()))) ||
+          (searchDUI && patient.dui === searchDUI)
+      );
 
-    toast({
-      title: "Success",
-      description: "Patient found!",
-    });
+      setSearchResults(results);
+
+      if (results.length === 0) {
+          toast({
+              title: "Information",
+              description: "No matching patients found.",
+          });
+      } else {
+          toast({
+              title: "Success",
+              description: "Patient(s) found!",
+          });
+      }
   };
 
   return (
-    <div className="container mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6"  onSubmit={handleSubmit}>
-        <div>
-          <Label htmlFor="searchName">Name</Label>
-          <Input type="text" id="searchName" placeholder="Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
-        </div>
-        <div>
-          <Label htmlFor="searchDUI">DUI</Label>
-          <Input type="text" id="searchDUI" placeholder="DUI" value={searchDUI} onChange={(e) => setSearchDUI(e.target.value)} />
-        </div>
-        <div className="md:col-span-2">
-          <Button type="submit">Search Patient</Button>
-        </div>
-      </form>
-    </div>
+      <div className="container mx-auto mt-8">
+          <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+              <div>
+                  <Label htmlFor="searchName">Name</Label>
+                  <Input type="text" id="searchName" placeholder="Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+              </div>
+              <div>
+                  <Label htmlFor="searchDUI">DUI</Label>
+                  <Input type="text" id="searchDUI" placeholder="DUI" value={searchDUI} onChange={(e) => setSearchDUI(e.target.value)} />
+              </div>
+              <div className="md:col-span-2">
+                  <Button type="submit">Search Patient</Button>
+              </div>
+          </form>
+
+          {searchResults.length > 0 && (
+              <div className="mt-6">
+                  <h3 className="text-xl font-bold mb-2">Search Results</h3>
+                  <ul>
+                      {searchResults.map((patient, index) => (
+                          <li key={index} className="mb-2 p-3 border rounded">
+                              <p><strong>Name:</strong> {patient.firstName} {patient.lastName}</p>
+                              <p><strong>DUI:</strong> {patient.dui}</p>
+                              <p><strong>Date of Birth:</strong> {patient.dob}</p>
+                              <p><strong>Phone:</strong> {patient.phone}</p>
+                              <p><strong>Address:</strong> {patient.address}</p>
+                          </li>
+                      ))}
+                  </ul>
+              </div>
+          )}
+      </div>
   );
 }
 
@@ -314,6 +333,7 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('Home');
   const router = useRouter();
+  const [patients, setPatients] = useState<any[]>([]);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -327,14 +347,18 @@ export default function Home() {
     setSelectedMenu(menuName);
   };
 
+  const handlePatientAdded = (newPatient: any) => {
+    setPatients([...patients, newPatient]);
+  };
+
   const renderContent = () => {
     switch (selectedMenu) {
       case 'Home':
         return <p>Welcome to the VacunaciónES application!</p>;
       case 'Add Patient':
-        return <AddPatientForm />;
+        return <AddPatientForm onPatientAdded={handlePatientAdded} />;
       case 'Search Patient':
-        return <SearchPatientForm />;
+        return <SearchPatientForm patients={patients} />;
       case 'Vaccine Registration':
         return <VaccineRegistrationForm />;
       case 'Print Vaccination History':
