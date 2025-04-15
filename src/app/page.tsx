@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import {
   Sidebar,
@@ -117,6 +117,20 @@ function AddPatientForm() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
 
+  useEffect(() => {
+    // Load data from local storage on component mount
+    const storedData = localStorage.getItem("patientData");
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      setFirstName(parsedData.firstName || "");
+      setLastName(parsedData.lastName || "");
+      setDui(parsedData.dui || "");
+      setDob(parsedData.dob || "");
+      setPhone(parsedData.phone || "");
+      setAddress(parsedData.address || "");
+    }
+  }, []);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -130,15 +144,18 @@ function AddPatientForm() {
       return;
     }
 
-    // Placeholder for actual form submission logic
-    console.log("Form submitted:", {
+    // Save data to local storage
+    const patientData = {
       firstName,
       lastName,
       dui,
       dob,
       phone,
       address,
-    });
+    };
+    localStorage.setItem("patientData", JSON.stringify(patientData));
+
+    console.log("Form submitted:", patientData);
 
     toast({
       title: "Success",
