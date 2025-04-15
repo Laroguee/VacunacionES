@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,7 +15,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarGroupLabel,
-  //SidebarGroupLabel, // Import missing
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
@@ -104,6 +106,97 @@ const MENU_ITEMS = [
     { name: 'National Vaccination Scheme', icon: 'workflow' },
 ];
 
+// Add Patient Form Component
+function AddPatientForm() {
+  return (
+    <div className="container mx-auto mt-8">
+      <h2 className="text-2xl font-bold mb-4">Add New Patient</h2>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="firstName">First Name</Label>
+          <Input type="text" id="firstName" placeholder="First Name" />
+        </div>
+        <div>
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input type="text" id="lastName" placeholder="Last Name" />
+        </div>
+        <div>
+          <Label htmlFor="dui">DUI (########-#)</Label>
+          <Input type="text" id="dui" placeholder="########-#" />
+        </div>
+        <div>
+          <Label htmlFor="dob">Date of Birth</Label>
+          <Input type="date" id="dob" />
+        </div>
+        <div>
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input type="tel" id="phone" placeholder="Phone Number" />
+        </div>
+        <div>
+          <Label htmlFor="address">Address</Label>
+          <Input type="text" id="address" placeholder="Address" />
+        </div>
+        <div className="md:col-span-2">
+          <Button type="submit">Add Patient</Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// Search Patient Form Component
+function SearchPatientForm() {
+  return (
+    <div className="container mx-auto mt-8">
+      <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="searchName">Name</Label>
+          <Input type="text" id="searchName" placeholder="Name" />
+        </div>
+        <div>
+          <Label htmlFor="searchDUI">DUI</Label>
+          <Input type="text" id="searchDUI" placeholder="DUI" />
+        </div>
+        <div className="md:col-span-2">
+          <Button type="submit">Search Patient</Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+// Vaccine Registration Form Component
+function VaccineRegistrationForm() {
+  return (
+    <div className="container mx-auto mt-8">
+      <h2 className="text-2xl font-bold mb-4">Vaccine Registration</h2>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="patientName">Patient Name</Label>
+          <Input type="text" id="patientName" placeholder="Patient Name" />
+        </div>
+        <div>
+          <Label htmlFor="vaccineType">Vaccine Type</Label>
+          <Input type="text" id="vaccineType" placeholder="Vaccine Type" />
+        </div>
+        <div>
+          <Label htmlFor="vaccineDate">Vaccine Date</Label>
+          <Input type="date" id="vaccineDate" />
+        </div>
+        <div>
+          <Label htmlFor="nextAppointment">Next Appointment Date</Label>
+          <Input type="date" id="nextAppointment" />
+        </div>
+        <div className="md:col-span-2">
+          <Button type="submit">Register Vaccine</Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('Home');
@@ -126,11 +219,11 @@ export default function Home() {
       case 'Home':
         return <p>Welcome to the VacunaciónES application!</p>;
       case 'Add Patient':
-        return <p>Add Patient form will be here.</p>;
+        return <AddPatientForm />;
       case 'Search Patient':
-        return <p>Search Patient form will be here.</p>;
+        return <SearchPatientForm />;
       case 'Vaccine Registration':
-        return <p>Vaccine Registration form will be here.</p>;
+        return <VaccineRegistrationForm />;
       case 'Print Vaccination History':
         return <p>Print Vaccination History content will be here.</p>;
       case 'National Vaccination Scheme':
