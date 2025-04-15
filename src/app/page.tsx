@@ -348,7 +348,7 @@ export default function Home() {
   };
 
   const handlePatientAdded = (newPatient: any) => {
-    setPatients([...patients, newPatient]);
+    setPatients(prevPatients => [...prevPatients, newPatient]);
   };
 
   const renderContent = () => {
