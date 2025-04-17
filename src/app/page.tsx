@@ -51,6 +51,13 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
@@ -351,15 +358,40 @@ function SearchPatientForm({ patients }: { patients: any[] }) {
 }
 
 // Vaccine Registration Form Component
-function VaccineRegistrationForm() {
+function VaccineRegistrationForm({vaccinationScheme}: {vaccinationScheme: VaccineData[]}) {
   const [patientName, setPatientName] = useState("");
   const [vaccineType, setVaccineType] = useState("");
   const [vaccineDate, setVaccineDate] = useState("");
   const [nextAppointment, setNextAppointment] = useState("");
   const { toast } = useToast();
 
+   const [nextAppointmentError, setNextAppointmentError] = useState("");
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+
+    if (!patientName || !vaccineType || !vaccineDate) {
+      toast({
+        title: "Warning",
+        description: "Please fill in all fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+     let hasErrors = false;
+
+     if (!nextAppointment) {
+         setNextAppointmentError("Next Appointment Date is required");
+         hasErrors = true;
+     } else {
+         setNextAppointmentError("");
+     }
+
+     if (hasErrors) {
+         return;
+     }
+
 
     // Placeholder for actual vaccine registration logic
     console.log("Vaccine registration submitted:", {
@@ -369,13 +401,7 @@ function VaccineRegistrationForm() {
       nextAppointment,
     });
 
-    if (!patientName || !vaccineType || !vaccineDate) {
-      toast({
-        title: "Warning",
-        description: "Please fill in all fields.",
-      });
-      return;
-    }
+
 
     toast({
       title: "Success",
@@ -391,10 +417,19 @@ function VaccineRegistrationForm() {
           <Label htmlFor="patientName">Patient Name</Label>
           <Input type="text" id="patientName" placeholder="Patient Name" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
         </div>
-        <div>
-          <Label htmlFor="vaccineType">Vaccine Type</Label>
-          <Input type="text" id="vaccineType" placeholder="Vaccine Type" value={vaccineType} onChange={(e) => setVaccineType(e.target.value)}/>
-        </div>
+         <div>
+             <Label htmlFor="vaccineType">Vaccine Type</Label>
+             <Select onValueChange={setVaccineType} defaultValue={vaccineType}>
+                 <SelectTrigger id="vaccineType">
+                     <SelectValue placeholder="Select a vaccine" />
+                 </SelectTrigger>
+                 <SelectContent>
+                     {vaccinationScheme.map((vaccine, index) => (
+                         <SelectItem key={index} value={vaccine.vaccine}>{vaccine.vaccine}</SelectItem>
+                     ))}
+                 </SelectContent>
+             </Select>
+         </div>
         <div>
           <Label htmlFor="vaccineDate">Vaccine Date</Label>
           <Input type="date" id="vaccineDate" value={vaccineDate} onChange={(e) => setVaccineDate(e.target.value)}/>
@@ -402,6 +437,7 @@ function VaccineRegistrationForm() {
         <div>
           <Label htmlFor="nextAppointment">Next Appointment Date</Label>
           <Input type="date" id="nextAppointment" value={nextAppointment} onChange={(e) => setNextAppointment(e.target.value)}/>
+           {nextAppointmentError && <p className="text-red-500 text-xs">{nextAppointmentError}</p>}
         </div>
         <div className="md:col-span-2">
           <Button type="submit">Register Vaccine</Button>
@@ -592,7 +628,7 @@ export default function Home() {
       case 'Search Patient':
         return <SearchPatientForm patients={patients} />;
       case 'Vaccine Registration':
-        return <VaccineRegistrationForm />;
+        return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} />;
       case 'Print Vaccination History':
         return <p>Print Vaccination History content will be here.</p>;
       case 'National Vaccination Scheme':
