@@ -358,7 +358,7 @@ function SearchPatientForm({ patients }: { patients: any[] }) {
 }
 
 // Vaccine Registration Form Component
-function VaccineRegistrationForm({vaccinationScheme}: {vaccinationScheme: VaccineData[]}) {
+function VaccineRegistrationForm({vaccinationScheme, patients}: {vaccinationScheme: VaccineData[], patients: any[]}) {
   const [patientName, setPatientName] = useState("");
   const [vaccineType, setVaccineType] = useState("");
   const [vaccineDate, setVaccineDate] = useState("");
@@ -367,56 +367,76 @@ function VaccineRegistrationForm({vaccinationScheme}: {vaccinationScheme: Vaccin
 
    const [nextAppointmentError, setNextAppointmentError] = useState("");
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+   const handleVaccineRegistration = (event: React.FormEvent) => {
+       event.preventDefault();
 
-    if (!patientName || !vaccineType || !vaccineDate) {
-      toast({
-        title: "Warning",
-        description: "Please fill in all fields.",
-        variant: "destructive",
-      });
-      return;
-    }
+       if (!patientName || !vaccineType || !vaccineDate) {
+           toast({
+               title: "Warning",
+               description: "Please fill in all fields.",
+               variant: "destructive",
+           });
+           return;
+       }
 
-     let hasErrors = false;
+       let hasErrors = false;
 
-     if (!nextAppointment) {
-         setNextAppointmentError("Next Appointment Date is required");
-         hasErrors = true;
-     } else {
-         setNextAppointmentError("");
-     }
+       if (!nextAppointment) {
+           setNextAppointmentError("Next Appointment Date is required");
+           hasErrors = true;
+       } else {
+           setNextAppointmentError("");
+       }
 
-     if (hasErrors) {
-         return;
-     }
+       if (hasErrors) {
+           return;
+       }
 
+       // Find the patient object based on the selected patientName
+       const patient = patients.find(p => `${p.firstName} ${p.lastName}` === patientName);
 
-    // Placeholder for actual vaccine registration logic
-    console.log("Vaccine registration submitted:", {
-      patientName,
-      vaccineType,
-      vaccineDate,
-      nextAppointment,
-    });
+       if (!patient) {
+           toast({
+               title: "Error",
+               description: "Selected patient not found.",
+               variant: "destructive",
+           });
+           return;
+       }
 
+       // Placeholder for actual vaccine registration logic
+       console.log("Vaccine registration submitted:", {
+           patient: patient, // Now includes the patient object
+           vaccineType,
+           vaccineDate,
+           nextAppointment,
+       });
 
-
-    toast({
-      title: "Success",
-      description: "Vaccine registered successfully!",
-    });
-  };
+       toast({
+           title: "Success",
+           description: "Vaccine registered successfully!",
+       });
+   };
 
   return (
     <div className="container mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Vaccine Registration</h2>
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
-        <div>
-          <Label htmlFor="patientName">Patient Name</Label>
-          <Input type="text" id="patientName" placeholder="Patient Name" value={patientName} onChange={(e) => setPatientName(e.target.value)} />
-        </div>
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleVaccineRegistration}>
+           <div>
+               <Label htmlFor="patientName">Patient Name</Label>
+               <Select onValueChange={setPatientName} defaultValue={patientName}>
+                   <SelectTrigger id="patientName">
+                       <SelectValue placeholder="Select a patient" />
+                   </SelectTrigger>
+                   <SelectContent>
+                       {patients.map((patient, index) => (
+                           <SelectItem key={index} value={`${patient.firstName} ${patient.lastName}`}>
+                               {patient.firstName} {patient.lastName}
+                           </SelectItem>
+                       ))}
+                   </SelectContent>
+               </Select>
+           </div>
          <div>
              <Label htmlFor="vaccineType">Vaccine Type</Label>
              <Select onValueChange={setVaccineType} defaultValue={vaccineType}>
@@ -425,7 +445,7 @@ function VaccineRegistrationForm({vaccinationScheme}: {vaccinationScheme: Vaccin
                  </SelectTrigger>
                  <SelectContent>
                      {vaccinationScheme.map((vaccine, index) => (
-                         <SelectItem key={index} value={vaccine.vaccine}>{vaccine.vaccine}</SelectItem>
+                         <SelectItem key={vaccine.vaccine} value={vaccine.vaccine}>{vaccine.vaccine}</SelectItem>
                      ))}
                  </SelectContent>
              </Select>
@@ -628,7 +648,7 @@ export default function Home() {
       case 'Search Patient':
         return <SearchPatientForm patients={patients} />;
       case 'Vaccine Registration':
-        return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} />;
+        return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} />;
       case 'Print Vaccination History':
         return <p>Print Vaccination History content will be here.</p>;
       case 'National Vaccination Scheme':
@@ -760,5 +780,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-
