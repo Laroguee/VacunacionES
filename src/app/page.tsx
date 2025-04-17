@@ -42,6 +42,16 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog"
+
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
@@ -401,12 +411,144 @@ function VaccineRegistrationForm() {
   );
 }
 
+// Vaccine Data Type
+interface VaccineData {
+  ageStage: string;
+  vaccine: string;
+}
+
+//Component to Add Vaccine
+function AddVaccineDialog({ onVaccineAdded }: { onVaccineAdded: (vaccine: VaccineData) => void }) {
+  const [ageStage, setAgeStage] = useState("");
+  const [vaccine, setVaccine] = useState("");
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onVaccineAdded({ ageStage, vaccine });
+    setAgeStage("");
+    setVaccine("");
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Add New Vaccine</DialogTitle>
+        <DialogDescription>
+          Add a new vaccine to the national vaccination scheme.
+        </DialogDescription>
+      </DialogHeader>
+      <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="ageStage">Age/Stage</Label>
+          <Input
+            type="text"
+            id="ageStage"
+            placeholder="Age/Stage"
+            value={ageStage}
+            onChange={(e) => setAgeStage(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="vaccine">Vaccine</Label>
+          <Input
+            type="text"
+            id="vaccine"
+            placeholder="Vaccine"
+            value={vaccine}
+            onChange={(e) => setVaccine(e.target.value)}
+          />
+        </div>
+        <div className="flex justify-end">
+          <DialogClose asChild>
+            <Button type="button" variant="secondary">
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button type="submit">Add Vaccine</Button>
+        </div>
+      </form>
+    </DialogContent>
+  );
+}
+
+// Component to Edit Vaccine
+function EditVaccineDialog({ vaccineData, onVaccineUpdated, onCancel }: { vaccineData: VaccineData, onVaccineUpdated: (vaccine: VaccineData) => void, onCancel: () => void }) {
+  const [ageStage, setAgeStage] = useState(vaccineData.ageStage);
+  const [vaccine, setVaccine] = useState(vaccineData.vaccine);
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onVaccineUpdated({ ageStage, vaccine });
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Edit Vaccine</DialogTitle>
+        <DialogDescription>
+          Edit the vaccine details in the national vaccination scheme.
+        </DialogDescription>
+      </DialogHeader>
+      <form onSubmit={handleSubmit} className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="editAgeStage">Age/Stage</Label>
+          <Input
+            type="text"
+            id="editAgeStage"
+            placeholder="Age/Stage"
+            value={ageStage}
+            onChange={(e) => setAgeStage(e.target.value)}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="editVaccine">Vaccine</Label>
+          <Input
+            type="text"
+            id="editVaccine"
+            placeholder="Vaccine"
+            value={vaccine}
+            onChange={(e) => setVaccine(e.target.value)}
+          />
+        </div>
+        <div className="flex justify-end">
+          <DialogClose asChild>
+              <Button type="button" variant="secondary" onClick={onCancel}>
+                Cancel
+              </Button>
+          </DialogClose>
+          <Button type="submit">Update Vaccine</Button>
+        </div>
+      </form>
+    </DialogContent>
+  );
+}
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('Home');
   const router = useRouter();
   const [patients, setPatients] = useState<any[]>([]);
+  const [vaccinationScheme, setVaccinationScheme] = useState<VaccineData[]>([
+    { ageStage: 'Recién Nacidos/as', vaccine: 'BCG, HB (Hepatitis B)' },
+    { ageStage: '2, 4 y 6 meses', vaccine: 'Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente' },
+    { ageStage: '12 meses', vaccine: 'Triple viral tipo SPR, Refuerzo de Neumococo 13 Valente' },
+    { ageStage: '15 meses', vaccine: 'Hepatitis A, Varicela' },
+    { ageStage: '18 meses', vaccine: 'Hexavalente, Triple viral tipo SPR' },
+    { ageStage: '24 meses', vaccine: 'Hepatitis A' },
+    { ageStage: '4 años', vaccine: 'DPT, Polio oral, Varicela' },
+    { ageStage: 'Niños y Niñas de 9 y 10 años', vaccine: 'VPH Cuadrivalente' },
+    { ageStage: 'Adolescentes y Adultos', vaccine: 'Td (Tétanos y Difteria)' },
+    { ageStage: 'Mujeres Embarazadas', vaccine: 'Tdpa, Td, Influenza Tetravalente' },
+    { ageStage: 'Adultos Mayores, Grupos de Riesgo y Personas con Enfermedades Crónicas', vaccine: 'Td, HB (Hepatitis B), Neumococo 23 Valente, Influenza Tetravalente' },
+    { ageStage: 'Otras Vacunas', vaccine: 'Fiebre Amarilla, Antirrábica Humana, SARS Cov-2' },
+  ]);
+
+  //Add Vaccine State
+  const [openAddVaccine, setOpenAddVaccine] = useState(false);
+
+  //Edit Vaccine State
+  const [openEditVaccine, setOpenEditVaccine] = useState(false);
+  const [selectedVaccine, setSelectedVaccine] = useState<VaccineData | null>(null);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -422,6 +564,23 @@ export default function Home() {
 
   const handlePatientAdded = (newPatient: any) => {
     setPatients(prevPatients => [...prevPatients, newPatient]);
+  };
+
+  // Function to add a new vaccine
+  const handleVaccineAdded = (newVaccine: VaccineData) => {
+    setVaccinationScheme(prevScheme => [...prevScheme, newVaccine]);
+    setOpenAddVaccine(false);
+  };
+
+  // Function to update a vaccine
+  const handleVaccineUpdated = (updatedVaccine: VaccineData) => {
+    setVaccinationScheme(prevScheme =>
+      prevScheme.map(vaccine =>
+        vaccine.ageStage === selectedVaccine?.ageStage ? updatedVaccine : vaccine
+      )
+    );
+    setOpenEditVaccine(false);
+    setSelectedVaccine(null);
   };
 
   const renderContent = () => {
@@ -440,63 +599,47 @@ export default function Home() {
         return (
           <div className="container mx-auto mt-8">
             <h2 className="text-2xl font-bold mb-4">National Vaccination Scheme</h2>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>Add New Vaccine</Button>
+                </DialogTrigger>
+                <AddVaccineDialog onVaccineAdded={handleVaccineAdded} />
+              </Dialog>
             <Table>
               <TableCaption>Recommended vaccinations at different stages of life.</TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[150px]">Age/Stage</TableHead>
                   <TableHead>Vaccine</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">Recién Nacidos/as</TableCell>
-                  <TableCell>BCG, HB (Hepatitis B)</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">2, 4 y 6 meses</TableCell>
-                  <TableCell>Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">12 meses</TableCell>
-                  <TableCell>Triple viral tipo SPR, Refuerzo de Neumococo 13 Valente</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">15 meses</TableCell>
-                  <TableCell>Hepatitis A, Varicela</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">18 meses</TableCell>
-                  <TableCell>Hexavalente, Triple viral tipo SPR</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">24 meses</TableCell>
-                  <TableCell>Hepatitis A</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell className="font-medium">4 años</TableCell>
-                  <TableCell>DPT, Polio oral, Varicela</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell className="font-medium">Niños y Niñas de 9 y 10 años</TableCell>
-                  <TableCell>VPH Cuadrivalente</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell className="font-medium">Adolescentes y Adultos</TableCell>
-                  <TableCell>Td (Tétanos y Difteria)</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell className="font-medium">Mujeres Embarazadas</TableCell>
-                  <TableCell>Tdpa, Td, Influenza Tetravalente</TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell className="font-medium">Adultos Mayores, Grupos de Riesgo y Personas con Enfermedades Crónicas</TableCell>
-                  <TableCell>Td, HB (Hepatitis B), Neumococo 23 Valente, Influenza Tetravalente</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">Otras Vacunas</TableCell>
-                  <TableCell>Fiebre Amarilla, Antirrábica Humana, SARS Cov-2</TableCell>
-                </TableRow>
+                {vaccinationScheme.map((vaccine, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{vaccine.ageStage}</TableCell>
+                    <TableCell>{vaccine.vaccine}</TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="icon" onClick={() => setSelectedVaccine(vaccine)}>
+                            <Icons.edit className="h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                        {selectedVaccine && (
+                          <EditVaccineDialog
+                            vaccineData={selectedVaccine}
+                            onVaccineUpdated={handleVaccineUpdated}
+                            onCancel={() => {
+                              setOpenEditVaccine(false);
+                              setSelectedVaccine(null);
+                            }}
+                          />
+                        )}
+                      </Dialog>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>
