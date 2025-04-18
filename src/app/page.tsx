@@ -451,7 +451,7 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
 
    const [nextAppointmentError, setNextAppointmentError] = useState("");
 
-   handleVaccineRegistration = (event: React.FormEvent) => {
+   const handleVaccineRegistration = (event: React.FormEvent) => {
        event.preventDefault();
 
        if (!patientName || !vaccineType || !vaccineDate) {
@@ -898,3 +898,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
