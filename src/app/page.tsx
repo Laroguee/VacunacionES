@@ -58,6 +58,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
@@ -288,6 +290,35 @@ function SearchPatientForm({ patients, vaccinations }: { patients: any[]; vaccin
   const { toast } = useToast();
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
+  const generatePdf = (patient: any) => {
+      const doc = new jsPDF();
+
+      // Add title
+      doc.setFontSize(20);
+      doc.text(`Vaccination History for ${patient.firstName} ${patient.lastName}`, 10, 10);
+
+      // Define the columns
+      const columns = ["Vaccine Type", "Vaccine Date", "Next Appointment"];
+
+      // Prepare the data for the table
+      const data = patient.vaccinations.map((vaccination: any) => [
+          vaccination.vaccineType,
+          vaccination.vaccineDate,
+          vaccination.nextAppointment,
+      ]);
+
+      // Add the table
+      (doc as any).autoTable({
+          head: [columns],
+          body: data,
+          startY: 20, // Start below the title
+      });
+
+      // Save or open the PDF
+      doc.save(`${patient.firstName}_${patient.lastName}_vaccination_history.pdf`);
+  };
+
+
   const handleSubmit = (event: React.FormEvent) => {
       event.preventDefault();
 
@@ -368,6 +399,7 @@ function SearchPatientForm({ patients, vaccinations }: { patients: any[]; vaccin
                                       </ul>
                                   </>
                               )}
+                               <Button onClick={() => generatePdf(patient)}>Download PDF</Button>
                           </li>
                       ))}
                   </ul>
@@ -820,4 +852,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
 
