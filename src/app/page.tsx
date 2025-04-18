@@ -59,7 +59,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -130,7 +129,6 @@ const MENU_ITEMS = [
     { name: 'Add Patient', icon: 'plusCircle' },
     { name: 'Search Patient', icon: 'search' },
     { name: 'Vaccine Registration', icon: 'edit' },
-    { name: 'Print Vaccination History', icon: 'fileText' },
     { name: 'National Vaccination Scheme', icon: 'slidersHorizontal' },
 ];
 
@@ -222,6 +220,7 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
       dob,
       phone,
       address,
+      vaccinations: [], // Initialize with an empty array for vaccinations
     };
 
     onPatientAdded(patientData);
@@ -283,7 +282,7 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
 }
 
 // Search Patient Form Component
-function SearchPatientForm({ patients }: { patients: any[] }) {
+function SearchPatientForm({ patients, vaccinations }: { patients: any[]; vaccinations: any[] }) {
   const [searchName, setSearchName] = useState("");
   const [searchDUI, setSearchDUI] = useState("");
   const { toast } = useToast();
@@ -300,10 +299,17 @@ function SearchPatientForm({ patients }: { patients: any[] }) {
           return;
       }
 
-      const results = patients.filter(patient =>
+      let results = patients.filter(patient =>
           (searchName && (patient.firstName.toLowerCase().includes(searchName.toLowerCase()) || patient.lastName.toLowerCase().includes(searchName.toLowerCase()))) ||
           (searchDUI && patient.dui === searchDUI)
       );
+
+      // Add vaccination data to the search results
+      results = results.map(patient => {
+          const patientVaccinations = vaccinations.filter(vaccination => vaccination.patientDUI === patient.dui);
+          return { ...patient, vaccinations: patientVaccinations };
+      });
+
 
       setSearchResults(results);
 
@@ -348,6 +354,20 @@ function SearchPatientForm({ patients }: { patients: any[] }) {
                               <p><strong>Date of Birth:</strong> {patient.dob}</p>
                               <p><strong>Phone:</strong> {patient.phone}</p>
                               <p><strong>Address:</strong> {patient.address}</p>
+                              {patient.vaccinations && patient.vaccinations.length > 0 && (
+                                  <>
+                                      <h4 className="text-lg font-bold mt-2">Vaccination History:</h4>
+                                      <ul>
+                                          {patient.vaccinations.map((vaccination, vacIndex) => (
+                                              <li key={vacIndex}>
+                                                  <strong>Vaccine Type:</strong> {vaccination.vaccineType},
+                                                  <strong>Vaccine Date:</strong> {vaccination.vaccineDate},
+                                                  <strong>Next Appointment:</strong> {vaccination.nextAppointment}
+                                              </li>
+                                          ))}
+                                      </ul>
+                                  </>
+                              )}
                           </li>
                       ))}
                   </ul>
@@ -357,8 +377,9 @@ function SearchPatientForm({ patients }: { patients: any[] }) {
   );
 }
 
+
 // Vaccine Registration Form Component
-function VaccineRegistrationForm({vaccinationScheme, patients}: {vaccinationScheme: VaccineData[], patients: any[]}) {
+function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegistered}: {vaccinationScheme: VaccineData[], patients: any[], onVaccineRegistered: (vaccination: any) => void}) {
   const [patientName, setPatientName] = useState("");
   const [vaccineType, setVaccineType] = useState("");
   const [vaccineDate, setVaccineDate] = useState("");
@@ -404,13 +425,15 @@ function VaccineRegistrationForm({vaccinationScheme, patients}: {vaccinationSche
            return;
        }
 
-       // Placeholder for actual vaccine registration logic
-       console.log("Vaccine registration submitted:", {
-           patient: patient, // Now includes the patient object
-           vaccineType,
-           vaccineDate,
-           nextAppointment,
-       });
+        // Create vaccine registration object
+        const vaccineData = {
+            patientDUI: patient.dui,
+            vaccineType,
+            vaccineDate,
+            nextAppointment,
+        };
+
+        onVaccineRegistered(vaccineData); // Pass the new vaccination data to the parent
 
        toast({
            title: "Success",
@@ -583,7 +606,10 @@ export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('Home');
   const router = useRouter();
-  const [patients, setPatients] = useState<any[]>([]);
+  const [patients, setPatients] = useState<any[]>([
+    // { firstName: 'John', lastName: 'Doe', dui: '12345678-9', dob: '2000-01-01', phone: '1234-5678', address: 'Some Address', vaccinations: [] } //Example
+  ]);
+  const [vaccinations, setVaccinations] = useState<any[]>([])
   const [vaccinationScheme, setVaccinationScheme] = useState<VaccineData[]>([
     { ageStage: 'Recién Nacidos/as', vaccine: 'BCG, HB (Hepatitis B)' },
     { ageStage: '2, 4 y 6 meses', vaccine: 'Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente' },
@@ -618,8 +644,25 @@ export default function Home() {
     setSelectedMenu(menuName);
   };
 
-  const handlePatientAdded = (newPatient: any) => {
-    setPatients(prevPatients => [...prevPatients, newPatient]);
+   const handlePatientAdded = (newPatient: any) => {
+       setPatients(prevPatients => [...prevPatients, newPatient]);
+   };
+
+  const handleVaccineRegistered = (newVaccination: any) => {
+      setVaccinations(prevVaccinations => [...prevVaccinations, newVaccination]);
+
+      // Update the patient's vaccination history
+      setPatients(prevPatients => {
+          return prevPatients.map(patient => {
+              if (patient.dui === newVaccination.patientDUI) {
+                  return {
+                      ...patient,
+                      vaccinations: [...(patient.vaccinations || []), newVaccination]
+                  };
+              }
+              return patient;
+          });
+      });
   };
 
   // Function to add a new vaccine
@@ -646,11 +689,9 @@ export default function Home() {
       case 'Add Patient':
         return <AddPatientForm onPatientAdded={handlePatientAdded} />;
       case 'Search Patient':
-        return <SearchPatientForm patients={patients} />;
+        return <SearchPatientForm patients={patients} vaccinations={vaccinations} />;
       case 'Vaccine Registration':
-        return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} />;
-      case 'Print Vaccination History':
-        return <p>Print Vaccination History content will be here.</p>;
+        return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} onVaccineRegistered={handleVaccineRegistered} />;
       case 'National Vaccination Scheme':
         return (
           <div className="container mx-auto mt-8">
@@ -762,7 +803,6 @@ export default function Home() {
                     {item.icon === 'plusCircle' && <Icons.plusCircle className="mr-2 h-4 w-4" />}
                     {item.icon === 'search' && <Icons.search className="mr-2 h-4 w-4" />}
                     {item.icon === 'edit' && <Icons.edit className="mr-2 h-4 w-4" />}
-                    {item.icon === 'fileText' && <Icons.fileText className="mr-2 h-4 w-4" />}
                     {item.icon === 'slidersHorizontal' && <Icons.slidersHorizontal className="mr-2 h-4 w-4" />}
                     <span>{item.name}</span>
                   </SidebarMenuButton>
@@ -780,3 +820,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
