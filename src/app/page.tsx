@@ -58,8 +58,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
@@ -284,131 +283,134 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
 }
 
 // Search Patient Form Component
-function SearchPatientForm({ patients, vaccinations }: { patients: any[]; vaccinations: any[] }) {
-  const [searchName, setSearchName] = useState("");
-  const [searchDUI, setSearchDUI] = useState("");
-  const { toast } = useToast();
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+function SearchPatientForm({ patients, vaccinations }: { patients: any[], vaccinations: any[] }) {
+    const [searchName, setSearchName] = useState("");
+    const [searchDUI, setSearchDUI] = useState("");
+    const { toast } = useToast();
+    const [searchResults, setSearchResults] = useState<any[]>([]);
 
-  const generatePdf = (patient: any) => {
-      const doc = new jsPDF();
+    const generateImage = async (patient: any) => {
+        const element = document.getElementById('vaccination-history');
 
-      // Add title
-      doc.setFontSize(20);
-      doc.text(`Vaccination History for ${patient.firstName} ${patient.lastName}`, 10, 10);
+        if (!element) {
+            toast({
+                title: "Error",
+                description: "Could not find vaccination history to export.",
+                variant: "destructive",
+            });
+            return;
+        }
 
-      // Define the columns
-      const columns = ["Vaccine Type", "Vaccine Date", "Next Appointment"];
+        try {
+            const canvas = await html2canvas(element);
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = `${patient.firstName}_${patient.lastName}_vaccination_history.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error generating image:", error);
+            toast({
+                title: "Error",
+                description: "Failed to generate image.",
+                variant: "destructive",
+            });
+        }
+    };
 
-      // Prepare the data for the table
-      const data = patient.vaccinations.map((vaccination: any) => [
-          vaccination.vaccineType,
-          vaccination.vaccineDate,
-          vaccination.nextAppointment,
-      ]);
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
 
-      // Add the table
-      (doc as any).autoTable({
-          head: [columns],
-          body: data,
-          startY: 20, // Start below the title
-      });
+        if (!searchName && !searchDUI) {
+            toast({
+                title: "Warning",
+                description: "Please enter a name or DUI to search.",
+            });
+            return;
+        }
 
-      // Save or open the PDF
-      doc.save(`${patient.firstName}_${patient.lastName}_vaccination_history.pdf`);
-  };
+        let results = patients.filter(patient =>
+            (searchName && (patient.firstName.toLowerCase().includes(searchName.toLowerCase()) || patient.lastName.toLowerCase().includes(searchName.toLowerCase()))) ||
+            (searchDUI && patient.dui === searchDUI)
+        );
 
-
-  const handleSubmit = (event: React.FormEvent) => {
-      event.preventDefault();
-
-      if (!searchName && !searchDUI) {
-          toast({
-              title: "Warning",
-              description: "Please enter a name or DUI to search.",
-          });
-          return;
-      }
-
-      let results = patients.filter(patient =>
-          (searchName && (patient.firstName.toLowerCase().includes(searchName.toLowerCase()) || patient.lastName.toLowerCase().includes(searchName.toLowerCase()))) ||
-          (searchDUI && patient.dui === searchDUI)
-      );
-
-      // Add vaccination data to the search results
-      results = results.map(patient => {
-          const patientVaccinations = vaccinations.filter(vaccination => vaccination.patientDUI === patient.dui);
-          return { ...patient, vaccinations: patientVaccinations };
-      });
+        // Add vaccination data to the search results
+        results = results.map(patient => {
+            const patientVaccinations = vaccinations.filter(vaccination => vaccination.patientDUI === patient.dui);
+            return { ...patient, vaccinations: patientVaccinations };
+        });
 
 
-      setSearchResults(results);
+        setSearchResults(results);
 
-      if (results.length === 0) {
-          toast({
-              title: "Information",
-              description: "No matching patients found.",
-          });
-      } else {
-          toast({
-              title: "Success",
-              description: "Patient(s) found!",
-          });
-      }
-  };
+        if (results.length === 0) {
+            toast({
+                title: "Information",
+                description: "No matching patients found.",
+            });
+        } else {
+            toast({
+                title: "Success",
+                description: "Patient(s) found!",
+            });
+        }
+    };
 
-  return (
-      <div className="container mx-auto mt-8">
-          <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
-              <div>
-                  <Label htmlFor="searchName">Name</Label>
-                  <Input type="text" id="searchName" placeholder="Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
-              </div>
-              <div>
-                  <Label htmlFor="searchDUI">DUI</Label>
-                  <Input type="text" id="searchDUI" placeholder="DUI" value={searchDUI} onChange={(e) => setSearchDUI(e.target.value)} />
-              </div>
-              <div className="md:col-span-2">
-                  <Button type="submit">Search Patient</Button>
-              </div>
-          </form>
+    return (
+        <div className="container mx-auto mt-8">
+            <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+                <div>
+                    <Label htmlFor="searchName">Name</Label>
+                    <Input type="text" id="searchName" placeholder="Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+                </div>
+                <div>
+                    <Label htmlFor="searchDUI">DUI</Label>
+                    <Input type="text" id="searchDUI" placeholder="DUI" value={searchDUI} onChange={(e) => setSearchDUI(e.target.value)} />
+                </div>
+                <div className="md:col-span-2">
+                    <Button type="submit">Search Patient</Button>
+                </div>
+            </form>
 
-          {searchResults.length > 0 && (
-              <div className="mt-6">
-                  <h3 className="text-xl font-bold mb-2">Search Results</h3>
-                  <ul>
-                      {searchResults.map((patient, index) => (
-                          <li key={index} className="mb-2 p-3 border rounded">
-                              <p><strong>Name:</strong> {patient.firstName} {patient.lastName}</p>
-                              <p><strong>DUI:</strong> {patient.dui}</p>
-                              <p><strong>Date of Birth:</strong> {patient.dob}</p>
-                              <p><strong>Phone:</strong> {patient.phone}</p>
-                              <p><strong>Address:</strong> {patient.address}</p>
-                              {patient.vaccinations && patient.vaccinations.length > 0 && (
-                                  <>
-                                      <h4 className="text-lg font-bold mt-2">Vaccination History:</h4>
-                                      <ul>
-                                          {patient.vaccinations.map((vaccination, vacIndex) => (
-                                              <li key={vacIndex}>
-                                                  <strong>Vaccine Type:</strong> {vaccination.vaccineType},
-                                                  <strong>Vaccine Date:</strong> {vaccination.vaccineDate},
-                                                  <strong>Next Appointment:</strong> {vaccination.nextAppointment}
-                                              </li>
-                                          ))}
-                                      </ul>
-                                  </>
-                              )}
-                               <Button onClick={() => generatePdf(patient)}>Download PDF</Button>
-                          </li>
-                      ))}
-                  </ul>
-              </div>
-          )}
-      </div>
-  );
+            {searchResults.length > 0 && (
+                <div className="mt-6">
+                    <h3 className="text-xl font-bold mb-2">Search Results</h3>
+                    <ul>
+                        {searchResults.map((patient, index) => (
+                            <li key={index} className="mb-2 p-3 border rounded">
+                                <p><strong>Name:</strong> {patient.firstName} {patient.lastName}</p>
+                                <p><strong>DUI:</strong> {patient.dui}</p>
+                                <p><strong>Date of Birth:</strong> {patient.dob}</p>
+                                <p><strong>Phone:</strong> {patient.phone}</p>
+                                <p><strong>Address:</strong> {patient.address}</p>
+                                <div id="vaccination-history">
+                                    {patient.vaccinations && patient.vaccinations.length > 0 && (
+                                        <>
+                                            <h4 className="text-lg font-bold mt-2">Vaccination History:</h4>
+                                            <ul>
+                                                {patient.vaccinations.map((vaccination, vacIndex) => (
+                                                    <li key={vacIndex}>
+                                                        <strong>Vaccine Type:</strong> {vaccination.vaccineType},
+                                                        <strong>Vaccine Date:</strong> {vaccination.vaccineDate},
+                                                        <strong>Next Appointment:</strong> {vaccination.nextAppointment}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </>
+                                    )}
+                                </div>
+                                <Button onClick={() => generateImage(patient)}>Download Image</Button>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
 }
-
 
 // Vaccine Registration Form Component
 function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegistered}: {vaccinationScheme: VaccineData[], patients: any[], onVaccineRegistered: (vaccination: any) => void}) {
@@ -852,5 +854,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-
