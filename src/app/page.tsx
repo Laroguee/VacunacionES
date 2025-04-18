@@ -418,6 +418,9 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
   const [vaccineType, setVaccineType] = useState("");
   const [vaccineDate, setVaccineDate] = useState("");
   const [nextAppointment, setNextAppointment] = useState("");
+  const [lotNumber, setLotNumber] = useState("");
+  const [doseNumber, setDoseNumber] = useState("");
+  const [observation, setObservation] = useState("");
   const { toast } = useToast();
 
    const [nextAppointmentError, setNextAppointmentError] = useState("");
@@ -465,6 +468,9 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
             vaccineType,
             vaccineDate,
             nextAppointment,
+            lotNumber,
+            doseNumber,
+            observation
         };
 
         onVaccineRegistered(vaccineData); // Pass the new vaccination data to the parent
@@ -516,6 +522,18 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
           <Input type="date" id="nextAppointment" value={nextAppointment} onChange={(e) => setNextAppointment(e.target.value)}/>
            {nextAppointmentError && <p className="text-red-500 text-xs">{nextAppointmentError}</p>}
         </div>
+          <div>
+              <Label htmlFor="lotNumber">Lot Number</Label>
+              <Input type="text" id="lotNumber" placeholder="Lot Number" value={lotNumber} onChange={(e) => setLotNumber(e.target.value)}/>
+          </div>
+          <div>
+              <Label htmlFor="doseNumber">Dose Number</Label>
+              <Input type="text" id="doseNumber" placeholder="Dose Number" value={doseNumber} onChange={(e) => setDoseNumber(e.target.value)}/>
+          </div>
+          <div>
+              <Label htmlFor="observation">Observation (Optional)</Label>
+              <Input type="text" id="observation" placeholder="Observation" value={observation} onChange={(e) => setObservation(e.target.value)}/>
+          </div>
         <div className="md:col-span-2">
           <Button type="submit">Register Vaccine</Button>
         </div>
