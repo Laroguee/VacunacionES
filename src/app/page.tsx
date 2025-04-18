@@ -300,6 +300,13 @@ function SearchPatientForm({ patients, vaccinations }: { patients: any[], vaccin
             });
             return;
         }
+        const patientInfo = document.createElement('div');
+        patientInfo.style.textAlign = 'center';
+        patientInfo.style.fontSize = '16px';
+        patientInfo.style.marginBottom = '10px';
+        patientInfo.innerHTML = `<strong>${patient.firstName} ${patient.lastName}</strong><br/>DUI: ${patient.dui}`;
+
+        element.insertBefore(patientInfo, element.firstChild);
 
         try {
             const canvas = await html2canvas(element);
@@ -317,6 +324,8 @@ function SearchPatientForm({ patients, vaccinations }: { patients: any[], vaccin
                 description: "Failed to generate image.",
                 variant: "destructive",
             });
+        } finally {
+            element.removeChild(patientInfo);
         }
     };
 
@@ -442,7 +451,7 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
 
    const [nextAppointmentError, setNextAppointmentError] = useState("");
 
-   const handleVaccineRegistration = (event: React.FormEvent) => {
+   handleVaccineRegistration = (event: React.FormEvent) => {
        event.preventDefault();
 
        if (!patientName || !vaccineType || !vaccineDate) {
