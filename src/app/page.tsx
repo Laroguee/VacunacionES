@@ -381,24 +381,41 @@ function SearchPatientForm({ patients, vaccinations }: { patients: any[], vaccin
                     <ul>
                         {searchResults.map((patient, index) => (
                             <li key={index} className="mb-2 p-3 border rounded">
-                                <p><strong>Name:</strong> {patient.firstName} {patient.lastName}</p>
-                                <p><strong>DUI:</strong> {patient.dui}</p>
-                                <p><strong>Date of Birth:</strong> {patient.dob}</p>
-                                <p><strong>Phone:</strong> {patient.phone}</p>
-                                <p><strong>Address:</strong> {patient.address}</p>
+                                <div className="flex justify-between items-center">
+                                    <p>
+                                        <strong>Name:</strong> {patient.firstName} {patient.lastName}, <strong>DUI:</strong> {patient.dui}
+                                    </p>
+                                </div>
+                                <p><strong>Date of Birth:</strong> {patient.dob}, <strong>Phone:</strong> {patient.phone}, <strong>Address:</strong> {patient.address}</p>
+
                                 <div id="vaccination-history">
                                     {patient.vaccinations && patient.vaccinations.length > 0 && (
                                         <>
                                             <h4 className="text-lg font-bold mt-2">Vaccination History:</h4>
-                                            <ul>
-                                                {patient.vaccinations.map((vaccination, vacIndex) => (
-                                                    <li key={vacIndex}>
-                                                        <strong>Vaccine Type:</strong> {vaccination.vaccineType},
-                                                        <strong>Vaccine Date:</strong> {vaccination.vaccineDate},
-                                                        <strong>Next Appointment:</strong> {vaccination.nextAppointment}
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Nº</TableHead>
+                                                        <TableHead>Vacuna</TableHead>
+                                                        <TableHead>Fecha Aplicación</TableHead>
+                                                        <TableHead>Dosis</TableHead>
+                                                        <TableHead>Lote</TableHead>
+                                                        <TableHead>Observaciones</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {patient.vaccinations.map((vaccination, vacIndex) => (
+                                                        <TableRow key={vacIndex}>
+                                                            <TableCell>{vacIndex + 1}</TableCell>
+                                                            <TableCell>{vaccination.vaccineType}</TableCell>
+                                                            <TableCell>{vaccination.vaccineDate}</TableCell>
+                                                            <TableCell>{vaccination.doseNumber}</TableCell>
+                                                            <TableCell>{vaccination.lotNumber}</TableCell>
+                                                            <TableCell>{vaccination.observation}</TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
                                         </>
                                     )}
                                 </div>
