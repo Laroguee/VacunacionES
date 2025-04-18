@@ -504,7 +504,7 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
                      {vaccinationScheme.map((vaccine, index) => (
                          <SelectItem key={vaccine.vaccine} value={vaccine.vaccine}>{vaccine.vaccine}</SelectItem>
                      ))}
-                 </SelectContent>
+                  </SelectContent>
              </Select>
          </div>
         <div>
