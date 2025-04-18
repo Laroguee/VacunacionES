@@ -283,14 +283,20 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
 }
 
 // Search Patient Form Component
-function SearchPatientForm({ patients, vaccinations }: { patients: any[], vaccinations: any[] }) {
+function SearchPatientForm({ patients, vaccinations, onPatientUpdated }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void }) {
     const [searchName, setSearchName] = useState("");
     const [searchDUI, setSearchDUI] = useState("");
     const { toast } = useToast();
     const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [editingPatient, setEditingPatient] = useState<string | null>(null); // Track which patient is being edited
+    const [editedFirstName, setEditedFirstName] = useState("");
+    const [editedLastName, setEditedLastName] = useState("");
+    const [editedDob, setEditedDob] = useState("");
+    const [editedPhone, setEditedPhone] = useState("");
+    const [editedAddress, setEditedAddress] = useState("");
 
     const generateImage = async (patient: any) => {
-        const element = document.getElementById('vaccination-history');
+        const element = document.getElementById('vaccination-history-' + patient.dui);
 
         if (!element) {
             toast({
@@ -367,6 +373,39 @@ function SearchPatientForm({ patients, vaccinations }: { patients: any[], vaccin
         }
     };
 
+    const enableEditing = (patient: any) => {
+        setEditingPatient(patient.dui);
+        setEditedFirstName(patient.firstName);
+        setEditedLastName(patient.lastName);
+        setEditedDob(patient.dob);
+        setEditedPhone(patient.phone);
+        setEditedAddress(patient.address);
+    };
+
+    const cancelEditing = () => {
+        setEditingPatient(null);
+    };
+
+    const saveChanges = (patient: any) => {
+        // Prepare updated patient data
+        const updatedPatient = {
+            ...patient,
+            firstName: editedFirstName,
+            lastName: editedLastName,
+            dob: editedDob,
+            phone: editedPhone,
+            address: editedAddress,
+        };
+
+        onPatientUpdated(updatedPatient);  // Update the patient
+
+        setEditingPatient(null); // Exit editing mode
+        toast({
+            title: "Success",
+            description: "Patient information updated successfully!",
+        });
+    };
+
     return (
         <div className="container mx-auto mt-8">
             <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
@@ -390,14 +429,78 @@ function SearchPatientForm({ patients, vaccinations }: { patients: any[], vaccin
                     <ul>
                         {searchResults.map((patient, index) => (
                             <li key={index} className="mb-2 p-3 border rounded">
-                                <div className="flex justify-between items-center">
-                                    <p>
-                                        <strong>Name:</strong> {patient.firstName} {patient.lastName}, <strong>DUI:</strong> {patient.dui}
-                                    </p>
-                                </div>
-                                <p><strong>Date of Birth:</strong> {patient.dob}, <strong>Phone:</strong> {patient.phone}, <strong>Address:</strong> {patient.address}</p>
+                                {editingPatient === patient.dui ? (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div>
+                                                <Label htmlFor={`firstName-${patient.dui}`}>First Name</Label>
+                                                <Input
+                                                    type="text"
+                                                    id={`firstName-${patient.dui}`}
+                                                    value={editedFirstName}
+                                                    onChange={(e) => setEditedFirstName(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor={`lastName-${patient.dui}`}>Last Name</Label>
+                                                <Input
+                                                    type="text"
+                                                    id={`lastName-${patient.dui}`}
+                                                    value={editedLastName}
+                                                    onChange={(e) => setEditedLastName(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor={`dob-${patient.dui}`}>Date of Birth</Label>
+                                                <Input
+                                                    type="date"
+                                                    id={`dob-${patient.dui}`}
+                                                    value={editedDob}
+                                                    onChange={(e) => setEditedDob(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor={`phone-${patient.dui}`}>Phone Number</Label>
+                                                <Input
+                                                    type="tel"
+                                                    id={`phone-${patient.dui}`}
+                                                    value={editedPhone}
+                                                    onChange={(e) => setEditedPhone(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label htmlFor={`address-${patient.dui}`}>Address</Label>
+                                                <Input
+                                                    type="text"
+                                                    id={`address-${patient.dui}`}
+                                                    value={editedAddress}
+                                                    onChange={(e) => setEditedAddress(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between mt-4">
+                                            <Button onClick={() => saveChanges(patient)}>Save</Button>
+                                            <Button variant="secondary" onClick={cancelEditing}>Cancel</Button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex justify-between items-center">
+                                            <p>
+                                                <strong>Name:</strong> {patient.firstName} {patient.lastName}, <strong>DUI:</strong> {patient.dui}
+                                            </p>
+                                            <div>
+                                                <Button variant="outline" size="icon" onClick={() => enableEditing(patient)}>
+                                                    <Icons.edit className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <p><strong>Date of Birth:</strong> {patient.dob}, <strong>Phone:</strong> {patient.phone}, <strong>Address:</strong> {patient.address}</p>
+                                    </>
+                                )}
 
-                                <div id="vaccination-history">
+
+                                <div id={`vaccination-history-${patient.dui}`}>
                                     {patient.vaccinations && patient.vaccinations.length > 0 && (
                                         <>
                                             <h4 className="text-lg font-bold mt-2">Vaccination History:</h4>
@@ -743,6 +846,26 @@ export default function Home() {
       });
   };
 
+    // Function to update a patient
+    const handlePatientUpdated = (updatedPatient: any) => {
+        setPatients(prevPatients => {
+            return prevPatients.map(patient => {
+                if (patient.dui === updatedPatient.dui) {
+                    return updatedPatient;
+                }
+                return patient;
+            });
+        });
+        setSearchResults(prevResults => {
+            return prevResults.map(result => {
+                if (result.dui === updatedPatient.dui) {
+                    return updatedPatient;
+                }
+                return result;
+            });
+        });
+    };
+
   // Function to add a new vaccine
   const handleVaccineAdded = (newVaccine: VaccineData) => {
     setVaccinationScheme(prevScheme => [...prevScheme, newVaccine]);
@@ -767,7 +890,7 @@ export default function Home() {
       case 'Add Patient':
         return <AddPatientForm onPatientAdded={handlePatientAdded} />;
       case 'Search Patient':
-        return <SearchPatientForm patients={patients} vaccinations={vaccinations} />;
+        return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated}/>;
       case 'Vaccine Registration':
         return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} onVaccineRegistered={handleVaccineRegistered} />;
       case 'National Vaccination Scheme':
@@ -898,4 +1021,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
 
