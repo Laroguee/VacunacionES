@@ -283,7 +283,7 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
 }
 
 // Search Patient Form Component
-function SearchPatientForm({ patients, vaccinations, onPatientUpdated }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void }) {
+function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccineUpdated }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void, onVaccineUpdated: (vaccination: any) => void }) {
     const [searchName, setSearchName] = useState("");
     const [searchDUI, setSearchDUI] = useState("");
     const { toast } = useToast();
@@ -294,6 +294,14 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated }: { patie
     const [editedDob, setEditedDob] = useState("");
     const [editedPhone, setEditedPhone] = useState("");
     const [editedAddress, setEditedAddress] = useState("");
+
+    const [editingVaccine, setEditingVaccine] = useState<string | null>(null);
+    const [editedVaccineType, setEditedVaccineType] = useState("");
+    const [editedVaccineDate, setEditedVaccineDate] = useState("");
+    const [editedDoseNumber, setEditedDoseNumber] = useState("");
+    const [editedLotNumber, setEditedLotNumber] = useState("");
+    const [editedObservation, setEditedObservation] = useState("");
+
 
     const generateImage = async (patient: any) => {
         const element = document.getElementById('vaccination-history-' + patient.dui);
@@ -406,6 +414,40 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated }: { patie
         });
     };
 
+    const enableVaccineEditing = (vaccination: any) => {
+        setEditingVaccine(vaccination.vaccineType);
+        setEditedVaccineType(vaccination.vaccineType);
+        setEditedVaccineDate(vaccination.vaccineDate);
+        setEditedDoseNumber(vaccination.doseNumber);
+        setEditedLotNumber(vaccination.lotNumber);
+        setEditedObservation(vaccination.observation);
+    };
+
+    const cancelVaccineEditing = () => {
+        setEditingVaccine(null);
+    };
+
+     const saveVaccineChanges = (vaccination: any) => {
+         // Prepare updated vaccination data
+         const updatedVaccination = {
+             ...vaccination,
+             vaccineType: editedVaccineType,
+             vaccineDate: editedVaccineDate,
+             doseNumber: editedDoseNumber,
+             lotNumber: editedLotNumber,
+             observation: editedObservation,
+         };
+
+         onVaccineUpdated(updatedVaccination);  // Update the vaccination
+
+         setEditingVaccine(null); // Exit editing mode
+         toast({
+             title: "Success",
+             description: "Vaccine information updated successfully!",
+         });
+     };
+
+
     return (
         <div className="container mx-auto mt-8">
             <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
@@ -513,17 +555,69 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated }: { patie
                                                         <TableHead>Dosis</TableHead>
                                                         <TableHead>Lote</TableHead>
                                                         <TableHead>Observaciones</TableHead>
+                                                        <TableHead>Acciones</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
                                                     {patient.vaccinations.map((vaccination, vacIndex) => (
                                                         <TableRow key={vacIndex}>
                                                             <TableCell>{vacIndex + 1}</TableCell>
-                                                            <TableCell>{vaccination.vaccineType}</TableCell>
-                                                            <TableCell>{vaccination.vaccineDate}</TableCell>
-                                                            <TableCell>{vaccination.doseNumber}</TableCell>
-                                                            <TableCell>{vaccination.lotNumber}</TableCell>
-                                                            <TableCell>{vaccination.observation}</TableCell>
+                                                            {editingVaccine === vaccination.vaccineType ? (
+                                                                <>
+                                                                    <TableCell>
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={editedVaccineType}
+                                                                            onChange={(e) => setEditedVaccineType(e.target.value)}
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Input
+                                                                            type="date"
+                                                                            value={editedVaccineDate}
+                                                                            onChange={(e) => setEditedVaccineDate(e.target.value)}
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={editedDoseNumber}
+                                                                            onChange={(e) => setEditedDoseNumber(e.target.value)}
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={editedLotNumber}
+                                                                            onChange={(e) => setEditedLotNumber(e.target.value)}
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Input
+                                                                            type="text"
+                                                                            value={editedObservation}
+                                                                            onChange={(e) => setEditedObservation(e.target.value)}
+                                                                        />
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Button onClick={() => saveVaccineChanges(vaccination)}>Save</Button>
+                                                                        <Button variant="secondary" onClick={cancelVaccineEditing}>Cancel</Button>
+                                                                    </TableCell>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <TableCell>{vaccination.vaccineType}</TableCell>
+                                                                    <TableCell>{vaccination.vaccineDate}</TableCell>
+                                                                    <TableCell>{vaccination.doseNumber}</TableCell>
+                                                                    <TableCell>{vaccination.lotNumber}</TableCell>
+                                                                    <TableCell>{vaccination.observation}</TableCell>
+                                                                    <TableCell>
+                                                                        <Button variant="outline" size="icon" onClick={() => enableVaccineEditing(vaccination)}>
+                                                                            <Icons.edit className="h-4 w-4" />
+                                                                        </Button>
+                                                                    </TableCell>
+                                                                </>
+                                                            )}
                                                         </TableRow>
                                                     ))}
                                                 </TableBody>
@@ -866,6 +960,47 @@ export default function Home() {
         });
     };
 
+     const handleVaccineUpdated = (updatedVaccination: any) => {
+         setVaccinations(prevVaccinations => {
+             return prevVaccinations.map(vaccination => {
+                 if (vaccination.vaccineType === updatedVaccination.vaccineType) {
+                     return updatedVaccination;
+                 }
+                 return vaccination;
+             });
+         });
+
+         setPatients(prevPatients => {
+             return prevPatients.map(patient => {
+                 if (patient.dui === updatedVaccination.patientDUI) {
+                     const updatedVaccinations = patient.vaccinations.map(vaccination => {
+                         if (vaccination.vaccineType === updatedVaccination.vaccineType) {
+                             return updatedVaccination;
+                         }
+                         return vaccination;
+                     });
+                     return { ...patient, vaccinations: updatedVaccinations };
+                 }
+                 return patient;
+             });
+         });
+
+         setSearchResults(prevResults => {
+             return prevResults.map(result => {
+                 if (result.dui === updatedVaccination.patientDUI) {
+                     const updatedVaccinations = result.vaccinations.map(vaccination => {
+                         if (vaccination.vaccineType === updatedVaccination.vaccineType) {
+                             return updatedVaccination;
+                         }
+                         return vaccination;
+                     });
+                     return { ...result, vaccinations: updatedVaccinations };
+                 }
+                 return result;
+             });
+         });
+     };
+
   // Function to add a new vaccine
   const handleVaccineAdded = (newVaccine: VaccineData) => {
     setVaccinationScheme(prevScheme => [...prevScheme, newVaccine]);
@@ -873,7 +1008,7 @@ export default function Home() {
   };
 
   // Function to update a vaccine
-  const handleVaccineUpdated = (updatedVaccine: VaccineData) => {
+  const handleVaccineUpdatedScheme = (updatedVaccine: VaccineData) => {
     setVaccinationScheme(prevScheme =>
       prevScheme.map(vaccine =>
         vaccine.ageStage === selectedVaccine?.ageStage ? updatedVaccine : vaccine
@@ -890,7 +1025,7 @@ export default function Home() {
       case 'Add Patient':
         return <AddPatientForm onPatientAdded={handlePatientAdded} />;
       case 'Search Patient':
-        return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated}/>;
+        return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} />;
       case 'Vaccine Registration':
         return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} onVaccineRegistered={handleVaccineRegistered} />;
       case 'National Vaccination Scheme':
@@ -927,7 +1062,7 @@ export default function Home() {
                         {selectedVaccine && (
                           <EditVaccineDialog
                             vaccineData={selectedVaccine}
-                            onVaccineUpdated={handleVaccineUpdated}
+                            onVaccineUpdated={handleVaccineUpdatedScheme}
                             onCancel={() => {
                               setOpenEditVaccine(false);
                               setSelectedVaccine(null);
@@ -1021,5 +1156,6 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
 
 
