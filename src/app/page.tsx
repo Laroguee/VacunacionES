@@ -78,6 +78,14 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+          <div className="flex flex-col items-center mb-6">
+              <h1 className="text-3xl font-bold mb-2">VacunaciónES</h1>
+              <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/3/34/Flag_of_El_Salvador.svg" // Replace with the actual path to your flag image
+                  alt="Bandera de El Salvador"
+                  className="w-20 h-12 object-contain"
+              />
+          </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
@@ -1188,10 +1196,7 @@ export default function Home() {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta acción cerrará su sesión en la aplicación.
-                </AlertDialogDescription>
+                ¿Está seguro?
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
