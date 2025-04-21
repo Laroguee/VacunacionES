@@ -71,7 +71,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
     if (username === "doctor" && password === "password") {
       onLogin();
     } else {
-      alert("Invalid credentials");
+      alert("Credenciales inválidas");
     }
   };
 
@@ -84,13 +84,13 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               className="block text-gray-700 text-sm font-bold mb-2"
               htmlFor="username"
             >
-              Username
+              Usuario
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="username"
               type="text"
-              placeholder="Username"
+              placeholder="Usuario"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
@@ -100,13 +100,13 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               className="block text-gray-700 text-sm font-bold mb-2"
               htmlFor="password"
             >
-              Password
+              Contraseña
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
               type="password"
-              placeholder="Password"
+              placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -116,7 +116,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               className="bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="submit"
             >
-              Sign In
+              Iniciar Sesión
             </button>
           </div>
         </form>
@@ -126,11 +126,11 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
 }
 
 const MENU_ITEMS = [
-    { name: 'Home', icon: 'home' },
-    { name: 'Add Patient', icon: 'plusCircle' },
-    { name: 'Search Patient', icon: 'search' },
-    { name: 'Vaccine Registration', icon: 'edit' },
-    { name: 'National Vaccination Scheme', icon: 'slidersHorizontal' },
+    { name: 'Inicio', icon: 'home' },
+    { name: 'Agregar Paciente', icon: 'plusCircle' },
+    { name: 'Buscar Paciente', icon: 'search' },
+    { name: 'Registro de Vacuna', icon: 'edit' },
+    { name: 'Esquema Nacional de Vacunación', icon: 'slidersHorizontal' },
 ];
 
 // Add Patient Form Component
@@ -157,42 +157,42 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
     let hasErrors = false;
 
     if (!firstName) {
-        setFirstNameError("First Name is required");
+        setFirstNameError("El nombre es requerido");
         hasErrors = true;
     } else {
         setFirstNameError("");
     }
 
     if (!lastName) {
-        setLastNameError("Last Name is required");
+        setLastNameError("El apellido es requerido");
         hasErrors = true;
     } else {
         setLastNameError("");
     }
 
     if (!dui) {
-        setDuiError("DUI is required");
+        setDuiError("El DUI es requerido");
         hasErrors = true;
     } else {
         setDuiError("");
     }
 
     if (!dob) {
-        setDobError("Date of Birth is required");
+        setDobError("La fecha de nacimiento es requerida");
         hasErrors = true;
     } else {
         setDobError("");
     }
 
     if (!phone) {
-        setPhoneError("Phone Number is required");
+        setPhoneError("El número de teléfono es requerido");
         hasErrors = true;
     } else {
         setPhoneError("");
     }
 
     if (!address) {
-        setAddressError("Address is required");
+        setAddressError("La dirección es requerida");
         hasErrors = true;
     } else {
         setAddressError("");
@@ -207,7 +207,7 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
     if (!duiValidationResult.isValid) {
       toast({
         title: "Error",
-        description: duiValidationResult.errorMessage || "Invalid DUI",
+        description: duiValidationResult.errorMessage || "DUI inválido",
         variant: "destructive",
       });
       return;
@@ -227,8 +227,8 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
     onPatientAdded(patientData);
 
     toast({
-      title: "Success",
-      description: "Patient added successfully!",
+      title: "Éxito",
+      description: "¡Paciente agregado exitosamente!",
     });
 
     // Clear the form
@@ -242,16 +242,16 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
 
   return (
     <div className="container mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-4">Add New Patient</h2>
+      <h2 className="text-2xl font-bold mb-4">Agregar Nuevo Paciente</h2>
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
         <div>
-          <Label htmlFor="firstName">First Name</Label>
-          <Input type="text" id="firstName" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          <Label htmlFor="firstName">Nombre</Label>
+          <Input type="text" id="firstName" placeholder="Nombre" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
            {firstNameError && <p className="text-red-500 text-xs">{firstNameError}</p>}
         </div>
         <div>
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input type="text" id="lastName" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)}/>
+          <Label htmlFor="lastName">Apellido</Label>
+          <Input type="text" id="lastName" placeholder="Apellido" value={lastName} onChange={(e) => setLastName(e.target.value)}/>
           {lastNameError && <p className="text-red-500 text-xs">{lastNameError}</p>}
         </div>
         <div>
@@ -260,22 +260,22 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
            {duiError && <p className="text-red-500 text-xs">{duiError}</p>}
         </div>
         <div>
-          <Label htmlFor="dob">Date of Birth</Label>
+          <Label htmlFor="dob">Fecha de Nacimiento</Label>
           <Input type="date" id="dob" value={dob} onChange={(e) => setDob(e.target.value)}/>
            {dobError && <p className="text-red-500 text-xs">{dobError}</p>}
         </div>
         <div>
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input type="tel" id="phone" placeholder="Phone Number" value={phone} onChange={(e) => setPhone(e.target.value)}/>
+          <Label htmlFor="phone">Número de Teléfono</Label>
+          <Input type="tel" id="phone" placeholder="Número de Teléfono" value={phone} onChange={(e) => setPhone(e.target.value)}/>
            {phoneError && <p className="text-red-500 text-xs">{phoneError}</p>}
         </div>
         <div>
-          <Label htmlFor="address">Address</Label>
-          <Input type="text" id="address" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)}/>
+          <Label htmlFor="address">Dirección</Label>
+          <Input type="text" id="address" placeholder="Dirección" value={address} onChange={(e) => setAddress(e.target.value)}/>
            {addressError && <p className="text-red-500 text-xs">{addressError}</p>}
         </div>
         <div className="md:col-span-2">
-          <Button type="submit">Add Patient</Button>
+          <Button type="submit">Agregar Paciente</Button>
         </div>
       </form>
     </div>
@@ -309,7 +309,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
         if (!element) {
             toast({
                 title: "Error",
-                description: "Could not find vaccination history to export.",
+                description: "No se pudo encontrar el historial de vacunación para exportar.",
                 variant: "destructive",
             });
             return;
@@ -335,7 +335,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
             console.error("Error generating image:", error);
             toast({
                 title: "Error",
-                description: "Failed to generate image.",
+                description: "Error al generar la imagen.",
                 variant: "destructive",
             });
         } finally {
@@ -348,8 +348,8 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
 
         if (!searchName && !searchDUI) {
             toast({
-                title: "Warning",
-                description: "Please enter a name or DUI to search.",
+                title: "Advertencia",
+                description: "Por favor, ingrese un nombre o DUI para buscar.",
             });
             return;
         }
@@ -371,13 +371,13 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
 
         if (results.length === 0) {
             toast({
-                title: "Information",
-                description: "No matching patients found.",
+                title: "Información",
+                description: "No se encontraron pacientes que coincidan.",
             });
         } else {
             toast({
-                title: "Success",
-                description: "Patient(s) found!",
+                title: "Éxito",
+                description: "¡Paciente(s) encontrado(s)!",
             });
         }
     };
@@ -410,8 +410,8 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
 
         setEditingPatient(null); // Exit editing mode
         toast({
-            title: "Success",
-            description: "Patient information updated successfully!",
+            title: "Éxito",
+            description: "¡Información del paciente actualizada exitosamente!",
         });
     };
 
@@ -443,8 +443,8 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
 
          setEditingVaccine(null); // Exit editing mode
          toast({
-             title: "Success",
-             description: "Vaccine information updated successfully!",
+             title: "Éxito",
+             description: "¡Información de la vacuna actualizada exitosamente!",
          });
      };
 
@@ -464,32 +464,32 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
             })
         );
         toast({
-            title: "Success",
-            description: "Vaccine deleted successfully!",
+            title: "Éxito",
+            description: "¡Vacuna eliminada exitosamente!",
         });
     };
 
 
     return (
         <div className="container mx-auto mt-8">
-            <h2 className="text-2xl font-bold mb-4">Search Patient</h2>
+            <h2 className="text-2xl font-bold mb-4">Buscar Paciente</h2>
             <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
                 <div>
-                    <Label htmlFor="searchName">Name</Label>
-                    <Input type="text" id="searchName" placeholder="Name" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+                    <Label htmlFor="searchName">Nombre</Label>
+                    <Input type="text" id="searchName" placeholder="Nombre" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
                 </div>
                 <div>
                     <Label htmlFor="searchDUI">DUI</Label>
                     <Input type="text" id="searchDUI" placeholder="DUI" value={searchDUI} onChange={(e) => setSearchDUI(e.target.value)} />
                 </div>
                 <div className="md:col-span-2">
-                    <Button type="submit">Search Patient</Button>
+                    <Button type="submit">Buscar Paciente</Button>
                 </div>
             </form>
 
             {searchResultsLocal.length > 0 && (
                 <div className="mt-6">
-                    <h3 className="text-xl font-bold mb-2">Search Results</h3>
+                    <h3 className="text-xl font-bold mb-2">Resultados de la Búsqueda</h3>
                     <ul>
                         {searchResultsLocal.map((patient, index) => (
                             <li key={index} className="mb-2 p-3 border rounded">
@@ -497,7 +497,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                     <>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
-                                                <Label htmlFor={`firstName-${patient.dui}`}>First Name</Label>
+                                                <Label htmlFor={`firstName-${patient.dui}`}>Nombre</Label>
                                                 <Input
                                                     type="text"
                                                     id={`firstName-${patient.dui}`}
@@ -506,7 +506,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor={`lastName-${patient.dui}`}>Last Name</Label>
+                                                <Label htmlFor={`lastName-${patient.dui}`}>Apellido</Label>
                                                 <Input
                                                     type="text"
                                                     id={`lastName-${patient.dui}`}
@@ -515,7 +515,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor={`dob-${patient.dui}`}>Date of Birth</Label>
+                                                <Label htmlFor={`dob-${patient.dui}`}>Fecha de Nacimiento</Label>
                                                 <Input
                                                     type="date"
                                                     id={`dob-${patient.dui}`}
@@ -524,7 +524,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor={`phone-${patient.dui}`}>Phone Number</Label>
+                                                <Label htmlFor={`phone-${patient.dui}`}>Número de Teléfono</Label>
                                                 <Input
                                                     type="tel"
                                                     id={`phone-${patient.dui}`}
@@ -533,7 +533,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                 />
                                             </div>
                                             <div>
-                                                <Label htmlFor={`address-${patient.dui}`}>Address</Label>
+                                                <Label htmlFor={`address-${patient.dui}`}>Dirección</Label>
                                                 <Input
                                                     type="text"
                                                     id={`address-${patient.dui}`}
@@ -543,15 +543,15 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                             </div>
                                         </div>
                                         <div className="flex justify-between mt-4">
-                                            <Button onClick={() => saveChanges(patient)}>Save</Button>
-                                            <Button variant="secondary" onClick={cancelEditing}>Cancel</Button>
+                                            <Button onClick={() => saveChanges(patient)}>Guardar</Button>
+                                            <Button variant="secondary" onClick={cancelEditing}>Cancelar</Button>
                                         </div>
                                     </>
                                 ) : (
                                     <>
                                         <div className="flex justify-between items-center">
                                             <p>
-                                                <strong>Name:</strong> {patient.firstName} {patient.lastName}, <strong>DUI:</strong> {patient.dui}
+                                                <strong>Nombre:</strong> {patient.firstName} {patient.lastName}, <strong>DUI:</strong> {patient.dui}
                                             </p>
                                             <div>
                                                 <Button variant="outline" size="icon" onClick={() => enableEditing(patient)}>
@@ -559,7 +559,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                 </Button>
                                             </div>
                                         </div>
-                                        <p><strong>Date of Birth:</strong> {patient.dob}, <strong>Phone:</strong> {patient.phone}, <strong>Address:</strong> {patient.address}</p>
+                                        <p><strong>Fecha de Nacimiento:</strong> {patient.dob}, <strong>Teléfono:</strong> {patient.phone}, <strong>Dirección:</strong> {patient.address}</p>
                                     </>
                                 )}
 
@@ -567,7 +567,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                 <div id={`vaccination-history-${patient.dui}`}>
                                     {patient.vaccinations && patient.vaccinations.length > 0 && (
                                         <>
-                                            <h4 className="text-lg font-bold mt-2">Vaccination History:</h4>
+                                            <h4 className="text-lg font-bold mt-2">Historial de Vacunación:</h4>
                                             <Table>
                                                 <TableHeader>
                                                     <TableRow>
@@ -622,8 +622,8 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                                         />
                                                                     </TableCell>
                                                                     <TableCell>
-                                                                        <Button onClick={() => saveVaccineChanges(vaccination)}>Save</Button>
-                                                                        <Button variant="secondary" onClick={cancelVaccineEditing}>Cancel</Button>
+                                                                        <Button onClick={() => saveVaccineChanges(vaccination)}>Guardar</Button>
+                                                                        <Button variant="secondary" onClick={cancelVaccineEditing}>Cancelar</Button>
                                                                     </TableCell>
                                                                 </>
                                                             ) : (
@@ -650,7 +650,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                         </>
                                     )}
                                 </div>
-                                <Button onClick={() => generateImage(patient)}>Download Image</Button>
+                                <Button onClick={() => generateImage(patient)}>Descargar Imagen</Button>
                             </li>
                         ))}
                     </ul>
@@ -678,8 +678,8 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
 
        if (!patientName || !vaccineType || !vaccineDate) {
            toast({
-               title: "Warning",
-               description: "Please fill in all fields.",
+               title: "Advertencia",
+               description: "Por favor, complete todos los campos.",
                variant: "destructive",
            });
            return;
@@ -688,7 +688,7 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
        let hasErrors = false;
 
        if (!nextAppointment) {
-           setNextAppointmentError("Next Appointment Date is required");
+           setNextAppointmentError("La fecha de la próxima cita es requerida");
            hasErrors = true;
        } else {
            setNextAppointmentError("");
@@ -704,7 +704,7 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
        if (!patient) {
            toast({
                title: "Error",
-               description: "Selected patient not found.",
+               description: "Paciente seleccionado no encontrado.",
                variant: "destructive",
            });
            return;
@@ -724,20 +724,20 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
         onVaccineRegistered(vaccineData); // Pass the new vaccination data to the parent
 
        toast({
-           title: "Success",
-           description: "Vaccine registered successfully!",
+           title: "Éxito",
+           description: "¡Vacuna registrada exitosamente!",
        });
    };
 
   return (
     <div className="container mx-auto mt-8">
-      <h2 className="text-2xl font-bold mb-4">Vaccine Registration</h2>
+      <h2 className="text-2xl font-bold mb-4">Registro de Vacuna</h2>
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleVaccineRegistration}>
            <div>
-               <Label htmlFor="patientName">Patient Name</Label>
+               <Label htmlFor="patientName">Nombre del Paciente</Label>
                <Select onValueChange={setPatientName} defaultValue={patientName}>
                    <SelectTrigger id="patientName">
-                       <SelectValue placeholder="Select a patient" />
+                       <SelectValue placeholder="Seleccione un paciente" />
                    </SelectTrigger>
                    <SelectContent>
                        {patients.map((patient, index) => (
@@ -749,10 +749,10 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
                </Select>
            </div>
          <div>
-             <Label htmlFor="vaccineType">Vaccine Type</Label>
+             <Label htmlFor="vaccineType">Tipo de Vacuna</Label>
              <Select onValueChange={setVaccineType} defaultValue={vaccineType}>
                  <SelectTrigger id="vaccineType">
-                     <SelectValue placeholder="Select a vaccine" />
+                     <SelectValue placeholder="Seleccione una vacuna" />
                  </SelectTrigger>
                  <SelectContent>
                      {vaccinationScheme.map((vaccine, index) => (
@@ -762,28 +762,28 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
              </Select>
          </div>
         <div>
-          <Label htmlFor="vaccineDate">Vaccine Date</Label>
+          <Label htmlFor="vaccineDate">Fecha de Vacunación</Label>
           <Input type="date" id="vaccineDate" value={vaccineDate} onChange={(e) => setVaccineDate(e.target.value)}/>
         </div>
         <div>
-          <Label htmlFor="nextAppointment">Next Appointment Date</Label>
+          <Label htmlFor="nextAppointment">Fecha de la Próxima Cita</Label>
           <Input type="date" id="nextAppointment" value={nextAppointment} onChange={(e) => setNextAppointment(e.target.value)}/>
            {nextAppointmentError && <p className="text-red-500 text-xs">{nextAppointmentError}</p>}
         </div>
           <div>
-              <Label htmlFor="lotNumber">Lot Number</Label>
-              <Input type="text" id="lotNumber" placeholder="Lot Number" value={lotNumber} onChange={(e) => setLotNumber(e.target.value)}/>
+              <Label htmlFor="lotNumber">Número de Lote</Label>
+              <Input type="text" id="lotNumber" placeholder="Número de Lote" value={lotNumber} onChange={(e) => setLotNumber(e.target.value)}/>
           </div>
           <div>
-              <Label htmlFor="doseNumber">Dose Number</Label>
-              <Input type="text" id="doseNumber" placeholder="Dose Number" value={doseNumber} onChange={(e) => setDoseNumber(e.target.value)}/>
+              <Label htmlFor="doseNumber">Número de Dosis</Label>
+              <Input type="text" id="doseNumber" placeholder="Número de Dosis" value={doseNumber} onChange={(e) => setDoseNumber(e.target.value)}/>
           </div>
           <div>
-              <Label htmlFor="observation">Observation (Optional)</Label>
-              <Input type="text" id="observation" placeholder="Observation" value={observation} onChange={(e) => setObservation(e.target.value)}/>
+              <Label htmlFor="observation">Observación (Opcional)</Label>
+              <Input type="text" id="observation" placeholder="Observación" value={observation} onChange={(e) => setObservation(e.target.value)}/>
           </div>
         <div className="md:col-span-2">
-          <Button type="submit">Register Vaccine</Button>
+          <Button type="submit">Registrar Vacuna</Button>
         </div>
       </form>
     </div>
@@ -811,28 +811,28 @@ function AddVaccineDialog({ onVaccineAdded }: { onVaccineAdded: (vaccine: Vaccin
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Add New Vaccine</DialogTitle>
+        <DialogTitle>Agregar Nueva Vacuna</DialogTitle>
         <DialogDescription>
-          Add a new vaccine to the national vaccination scheme.
+          Agregue una nueva vacuna al esquema nacional de vacunación.
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="grid gap-4 py-4">
         <div className="grid gap-2">
-          <Label htmlFor="ageStage">Age/Stage</Label>
+          <Label htmlFor="ageStage">Edad/Etapa</Label>
           <Input
             type="text"
             id="ageStage"
-            placeholder="Age/Stage"
+            placeholder="Edad/Etapa"
             value={ageStage}
             onChange={(e) => setAgeStage(e.target.value)}
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="vaccine">Vaccine</Label>
+          <Label htmlFor="vaccine">Vacuna</Label>
           <Input
             type="text"
             id="vaccine"
-            placeholder="Vaccine"
+            placeholder="Vacuna"
             value={vaccine}
             onChange={(e) => setVaccine(e.target.value)}
           />
@@ -840,10 +840,10 @@ function AddVaccineDialog({ onVaccineAdded }: { onVaccineAdded: (vaccine: Vaccin
         <div className="flex justify-end">
           <DialogClose asChild>
             <Button type="button" variant="secondary">
-              Cancel
+              Cancelar
             </Button>
           </DialogClose>
-          <Button type="submit">Add Vaccine</Button>
+          <Button type="submit">Agregar Vacuna</Button>
         </div>
       </form>
     </DialogContent>
@@ -863,28 +863,28 @@ function EditVaccineDialog({ vaccineData, onVaccineUpdated, onCancel }: { vaccin
   return (
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Edit Vaccine</DialogTitle>
+        <DialogTitle>Editar Vacuna</DialogTitle>
         <DialogDescription>
-          Edit the vaccine details in the national vaccination scheme.
+          Edite los detalles de la vacuna en el esquema nacional de vacunación.
         </DialogDescription>
       </DialogHeader>
       <form onSubmit={handleSubmit} className="grid gap-4 py-4">
         <div className="grid gap-2">
-          <Label htmlFor="editAgeStage">Age/Stage</Label>
+          <Label htmlFor="editAgeStage">Edad/Etapa</Label>
           <Input
             type="text"
             id="editAgeStage"
-            placeholder="Age/Stage"
+            placeholder="Edad/Etapa"
             value={ageStage}
             onChange={(e) => setAgeStage(e.target.value)}
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="editVaccine">Vaccine</Label>
+          <Label htmlFor="editVaccine">Vacuna</Label>
           <Input
             type="text"
             id="editVaccine"
-            placeholder="Vaccine"
+            placeholder="Vacuna"
             value={vaccine}
             onChange={(e) => setVaccine(e.target.value)}
           />
@@ -892,10 +892,10 @@ function EditVaccineDialog({ vaccineData, onVaccineUpdated, onCancel }: { vaccin
         <div className="flex justify-end">
           <DialogClose asChild>
               <Button type="button" variant="secondary" onClick={onCancel}>
-                Cancel
+                Cancelar
               </Button>
           </DialogClose>
-          <Button type="submit">Update Vaccine</Button>
+          <Button type="submit">Actualizar Vacuna</Button>
         </div>
       </form>
     </DialogContent>
@@ -904,7 +904,7 @@ function EditVaccineDialog({ vaccineData, onVaccineUpdated, onCancel }: { vaccin
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState('Home');
+  const [selectedMenu, setSelectedMenu] = useState('Inicio');
   const router = useRouter();
   const [patients, setPatients] = useState<any[]>([
     // { firstName: 'John', lastName: 'Doe', dui: '12345678-9', dob: '2000-01-01', phone: '1234-5678', address: 'Some Address', vaccinations: [] } //Example
@@ -1079,31 +1079,31 @@ export default function Home() {
 
   const renderContent = () => {
     switch (selectedMenu) {
-      case 'Home':
-        return <p>Welcome to the VacunaciónES application!</p>;
-      case 'Add Patient':
+      case 'Inicio':
+        return <p>¡Bienvenido a la aplicación VacunaciónES!</p>;
+      case 'Agregar Paciente':
         return <AddPatientForm onPatientAdded={handlePatientAdded} />;
-      case 'Search Patient':
+      case 'Buscar Paciente':
         return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} onDeleteVaccine={handleDeleteVaccine} setSearchResults={setSearchResults} />;
-      case 'Vaccine Registration':
+      case 'Registro de Vacuna':
         return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} onVaccineRegistered={handleVaccineRegistered} />;
-      case 'National Vaccination Scheme':
+      case 'Esquema Nacional de Vacunación':
         return (
           <div className="container mx-auto mt-8">
-            <h2 className="text-2xl font-bold mb-4">National Vaccination Scheme</h2>
+            <h2 className="text-2xl font-bold mb-4">Esquema Nacional de Vacunación</h2>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button>Add New Vaccine</Button>
+                  <Button>Agregar Nueva Vacuna</Button>
                 </DialogTrigger>
                 <AddVaccineDialog onVaccineAdded={handleVaccineAdded} />
               </Dialog>
             <Table>
-              <TableCaption>Recommended vaccinations at different stages of life.</TableCaption>
+              <TableCaption>Vacunas recomendadas en diferentes etapas de la vida.</TableCaption>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px]">Age/Stage</TableHead>
-                  <TableHead>Vaccine</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className="w-[150px]">Edad/Etapa</TableHead>
+                  <TableHead>Vacuna</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1137,7 +1137,7 @@ export default function Home() {
           </div>
         );
       default:
-        return <p>Welcome to the VacunaciónES application!</p>;
+        return <p>¡Bienvenido a la aplicación VacunaciónES!</p>;
     }
   };
 
@@ -1156,19 +1156,19 @@ export default function Home() {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="outline">
-                Logout
+                Cerrar Sesión
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action will log you out of the application.
+                  Esta acción cerrará su sesión en la aplicación.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={handleLogout}>Cerrar Sesión</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -1185,11 +1185,11 @@ export default function Home() {
             alt="Logo"
             className="rounded-full w-16 h-16 mx-auto"
           />
-          <p className="text-center text-sm">Medical Staff</p>
+          <p className="text-center text-sm">Personal Médico</p>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>Menu</SidebarGroupLabel>
+            <SidebarGroupLabel>Menú</SidebarGroupLabel>
             <SidebarMenu>
               {MENU_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.name}>
@@ -1215,7 +1215,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-
-
-
