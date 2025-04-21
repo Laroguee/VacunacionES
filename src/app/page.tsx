@@ -1075,6 +1075,12 @@ export default function Home() {
     setSelectedVaccine(null);
   };
 
+    const handleVaccineDeletedScheme = (vaccineToDelete: VaccineData) => {
+        setVaccinationScheme(prevScheme =>
+            prevScheme.filter(vaccine => vaccine !== vaccineToDelete)
+        );
+    };
+
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const renderContent = () => {
@@ -1112,23 +1118,44 @@ export default function Home() {
                     <TableCell className="font-medium">{vaccine.ageStage}</TableCell>
                     <TableCell>{vaccine.vaccine}</TableCell>
                     <TableCell>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="icon" onClick={() => setSelectedVaccine(vaccine)}>
-                            <Icons.edit className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        {selectedVaccine && (
-                          <EditVaccineDialog
-                            vaccineData={selectedVaccine}
-                            onVaccineUpdated={handleVaccineUpdatedScheme}
-                            onCancel={() => {
-                              setOpenEditVaccine(false);
-                              setSelectedVaccine(null);
-                            }}
-                          />
-                        )}
-                      </Dialog>
+                        <div className="flex gap-2">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" size="icon" onClick={() => setSelectedVaccine(vaccine)}>
+                                        <Icons.edit className="h-4 w-4" />
+                                    </Button>
+                                </DialogTrigger>
+                                {selectedVaccine && (
+                                    <EditVaccineDialog
+                                        vaccineData={selectedVaccine}
+                                        onVaccineUpdated={handleVaccineUpdatedScheme}
+                                        onCancel={() => {
+                                            setOpenEditVaccine(false);
+                                            setSelectedVaccine(null);
+                                        }}
+                                    />
+                                )}
+                            </Dialog>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="outline" size="icon">
+                                        <Icons.trash className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>¿Está seguro de que desea eliminar esta vacuna?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Esta acción eliminará la vacuna del esquema nacional de vacunación.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleVaccineDeletedScheme(vaccine)}>Eliminar</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
                     </TableCell>
                   </TableRow>
                 ))}
