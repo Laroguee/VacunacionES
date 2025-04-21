@@ -283,7 +283,7 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
 }
 
 // Search Patient Form Component
-function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccineUpdated }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void, onVaccineUpdated: (vaccination: any) => void }) {
+function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccineUpdated, onDeleteVaccine }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void, onVaccineUpdated: (vaccination: any) => void, onDeleteVaccine: (vaccination: any) => void }) {
     const [searchName, setSearchName] = useState("");
     const [searchDUI, setSearchDUI] = useState("");
     const { toast } = useToast();
@@ -446,6 +446,14 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
              description: "Vaccine information updated successfully!",
          });
      };
+
+    const handleDeleteVaccine = (vaccination: any) => {
+        onDeleteVaccine(vaccination);
+        toast({
+            title: "Success",
+            description: "Vaccine deleted successfully!",
+        });
+    };
 
 
     return (
@@ -614,6 +622,9 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                                     <TableCell>
                                                                         <Button variant="outline" size="icon" onClick={() => enableVaccineEditing(vaccination)}>
                                                                             <Icons.edit className="h-4 w-4" />
+                                                                        </Button>
+                                                                        <Button variant="outline" size="icon" onClick={() => handleDeleteVaccine(vaccination)}>
+                                                                            <Icons.trash className="h-4 w-4" />
                                                                         </Button>
                                                                     </TableCell>
                                                                 </>
@@ -1000,6 +1011,38 @@ export default function Home() {
              });
          });
      };
+    const handleDeleteVaccine = (vaccinationToDelete: any) => {
+        // Update vaccinations state
+        setVaccinations(prevVaccinations =>
+            prevVaccinations.filter(vaccination => vaccination !== vaccinationToDelete)
+        );
+
+        // Update patients state
+        setPatients(prevPatients =>
+            prevPatients.map(patient => {
+                if (patient.dui === vaccinationToDelete.patientDUI) {
+                    return {
+                        ...patient,
+                        vaccinations: patient.vaccinations.filter(vaccination => vaccination !== vaccinationToDelete)
+                    };
+                }
+                return patient;
+            })
+        );
+
+        // Update searchResults state
+        setSearchResults(prevResults =>
+            prevResults.map(result => {
+                if (result.dui === vaccinationToDelete.patientDUI) {
+                    return {
+                        ...result,
+                        vaccinations: result.vaccinations.filter(vaccination => vaccination !== vaccinationToDelete)
+                    };
+                }
+                return result;
+            })
+        );
+    };
 
   // Function to add a new vaccine
   const handleVaccineAdded = (newVaccine: VaccineData) => {
@@ -1025,7 +1068,7 @@ export default function Home() {
       case 'Add Patient':
         return <AddPatientForm onPatientAdded={handlePatientAdded} />;
       case 'Search Patient':
-        return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} />;
+        return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} onDeleteVaccine={handleDeleteVaccine} />;
       case 'Vaccine Registration':
         return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} onVaccineRegistered={handleVaccineRegistered} />;
       case 'National Vaccination Scheme':
@@ -1156,6 +1199,7 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
 
 
 
