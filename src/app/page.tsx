@@ -283,11 +283,11 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
 }
 
 // Search Patient Form Component
-function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccineUpdated, onDeleteVaccine }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void, onVaccineUpdated: (vaccination: any) => void, onDeleteVaccine: (vaccination: any) => void }) {
+function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccineUpdated, onDeleteVaccine, setSearchResults }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void, onVaccineUpdated: (vaccination: any) => void, onDeleteVaccine: (vaccination: any) => void, setSearchResults: React.Dispatch<React.SetStateAction<any[]>> }) {
     const [searchName, setSearchName] = useState("");
     const [searchDUI, setSearchDUI] = useState("");
     const { toast } = useToast();
-    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [searchResultsLocal, setSearchResultsLocal] = useState<any[]>([]);
     const [editingPatient, setEditingPatient] = useState<string | null>(null); // Track which patient is being edited
     const [editedFirstName, setEditedFirstName] = useState("");
     const [editedLastName, setEditedLastName] = useState("");
@@ -367,6 +367,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
 
 
         setSearchResults(results);
+        setSearchResultsLocal(results);
 
         if (results.length === 0) {
             toast({
@@ -448,7 +449,20 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
      };
 
     const handleDeleteVaccine = (vaccination: any) => {
+        // Update vaccinations state
         onDeleteVaccine(vaccination);
+
+        setSearchResults(prevResults =>
+            prevResults.map(result => {
+                if (result.dui === vaccination.patientDUI) {
+                    return {
+                        ...result,
+                        vaccinations: result.vaccinations.filter(v => v !== vaccination)
+                    };
+                }
+                return result;
+            })
+        );
         toast({
             title: "Success",
             description: "Vaccine deleted successfully!",
@@ -473,11 +487,11 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                 </div>
             </form>
 
-            {searchResults.length > 0 && (
+            {searchResultsLocal.length > 0 && (
                 <div className="mt-6">
                     <h3 className="text-xl font-bold mb-2">Search Results</h3>
                     <ul>
-                        {searchResults.map((patient, index) => (
+                        {searchResultsLocal.map((patient, index) => (
                             <li key={index} className="mb-2 p-3 border rounded">
                                 {editingPatient === patient.dui ? (
                                     <>
@@ -1061,6 +1075,8 @@ export default function Home() {
     setSelectedVaccine(null);
   };
 
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+
   const renderContent = () => {
     switch (selectedMenu) {
       case 'Home':
@@ -1068,7 +1084,7 @@ export default function Home() {
       case 'Add Patient':
         return <AddPatientForm onPatientAdded={handlePatientAdded} />;
       case 'Search Patient':
-        return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} onDeleteVaccine={handleDeleteVaccine} />;
+        return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} onDeleteVaccine={handleDeleteVaccine} setSearchResults={setSearchResults} />;
       case 'Vaccine Registration':
         return <VaccineRegistrationForm vaccinationScheme={vaccinationScheme} patients={patients} onVaccineRegistered={handleVaccineRegistered} />;
       case 'National Vaccination Scheme':
