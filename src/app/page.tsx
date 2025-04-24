@@ -1,14 +1,17 @@
 'use client'
+import { SidebarMenu } from '@/components/ui/sidebar';
+import { updatePatientVaccination } from '@/services/vaccination-service';
 import { getAllPatients, addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
+import { addVaccineToScheme } from '@/services/vaccine-service';
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
-import {
+import { 
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+
   SidebarHeader,
-  SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -16,12 +19,11 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogAction,
+  AlertDialogCancel, 
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
@@ -29,6 +31,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { validateDui } from "@/services/dui-validator";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -83,7 +86,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               <img
                   src="https://upload.wikimedia.org/wikipedia/commons/3/34/Flag_of_El_Salvador.svg" // Replace with the actual path to your flag image
                   alt="Bandera de El Salvador"
-                  className="w-20 h-12 object-contain"
+                  className="w-20 h-12 object-contain"                 
               />
           </div>
         <form onSubmit={handleSubmit}>
@@ -674,88 +677,95 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
 }
 
 // Vaccine Registration Form Component
-function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegistered}: {vaccinationScheme: VaccineData[], patients: any[], onVaccineRegistered: (vaccination: any) => void}) {
-  const [patientName, setPatientName] = useState("");
-  const [vaccineType, setVaccineType] = useState("");
-  const [vaccineDate, setVaccineDate] = useState("");
-  const [nextAppointment, setNextAppointment] = useState("");
-  const [lotNumber, setLotNumber] = useState("");
+function VaccineRegistrationForm({ vaccinationScheme, patients, onVaccineRegistered }: { vaccinationScheme: VaccineData[], patients: any[], onVaccineRegistered: (vaccination: any) => void }) {
+    const [patientName, setPatientName] = useState("");
+    const [patientId, setPatientId] = useState("");
+    const [vaccineType, setVaccineType] = useState("");
+    const [vaccineDate, setVaccineDate] = useState("");
+    const [nextAppointment, setNextAppointment] = useState("");
+    const [nextAppointmentError, setNextAppointmentError] = useState("");
+
+    const [lotNumber, setLotNumber] = useState("");
+
+
   const [doseNumber, setDoseNumber] = useState("");
   const [observation, setObservation] = useState("");
   const { toast } = useToast();
 
-   const [nextAppointmentError, setNextAppointmentError] = useState("");
 
-   const handleVaccineRegistration = (event: React.FormEvent) => {
-       event.preventDefault();
+    const handleVaccineRegistration = async (event: React.FormEvent) => {
+        event.preventDefault();
 
-       if (!patientName || !vaccineType || !vaccineDate) {
-           toast({
-               title: "Advertencia",
-               description: "Por favor, complete todos los campos.",
-               variant: "destructive",
-           });
-           return;
-       }
+        if (!patientId || !vaccineType || !vaccineDate) {
+            toast({
+                
+                title: "Advertencia",
+                description: "Por favor, complete todos los campos.",
+                variant: "destructive",
+            });
+            return;
+        }
 
-       let hasErrors = false;
+        let hasErrors = false;
 
-       if (!nextAppointment) {
-           setNextAppointmentError("La fecha de la próxima cita es requerida");
-           hasErrors = true;
-       } else {
-           setNextAppointmentError("");
-       }
+        if (!nextAppointment) {
+            setNextAppointmentError("La fecha de la próxima cita es requerida");
+            hasErrors = true;
+        } else {
+            setNextAppointmentError("");
+        }
 
-       if (hasErrors) {
-           return;
-       }
+        if (hasErrors) {
+            return;
+        }
 
-       // Find the patient object based on the selected patientName
-       const patient = patients.find(p => `${p.firstName} ${p.lastName}` === patientName);
-
-       if (!patient) {
-           toast({
-               title: "Error",
-               description: "Paciente seleccionado no encontrado.",
-               variant: "destructive",
-           });
-           return;
-       }
-
-        // Create vaccine registration object
-        const vaccineData = {
-            patientDUI: patient.dui,
-            vaccineType,
-            vaccineDate,
-            nextAppointment,
-            lotNumber,
-            doseNumber,
-            observation
+        const vaccinationData = {            
+            vaccineType: vaccineType,
+            vaccineDate: vaccineDate,
+            nextAppointment: nextAppointment,
+            lotNumber: lotNumber,
+            doseNumber: doseNumber,
+            observation: observation,
         };
-
-        onVaccineRegistered(vaccineData); // Pass the new vaccination data to the parent
-
-       toast({
-           title: "Éxito",
-           description: "¡Vacuna registrada exitosamente!",
-       });
-   };
+        try {
+            await updatePatientVaccination(patientId, vaccinationData);
+            
+            toast({
+                title: "Éxito",
+                description: "Vacuna registrada correctamente.",
+            });
+            setPatientName("");
+            setVaccineType("");
+            setVaccineDate("");
+            setNextAppointment("");
+            setLotNumber("");
+            setDoseNumber("");
+            setObservation("");
+        } catch (error) {
+            toast({
+                title: "Error",
+                description: "Error al registrar la vacuna.",
+                variant: "destructive",
+            });
+            console.error("Error registering vaccine:", error);
+        }
+    };
 
   return (
     <div className="container mx-auto mt-8">
       <h2 className="text-2xl font-bold mb-4">Registro de Vacuna</h2>
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleVaccineRegistration}>
            <div>
-               <Label htmlFor="patientName">Nombre del Paciente</Label>
-               <Select onValueChange={setPatientName} defaultValue={patientName}>
-                   <SelectTrigger id="patientName">
+               <Label htmlFor="patientId">Nombre del Paciente</Label>
+               <Select onValueChange={setPatientId} defaultValue={patientId}>
+                    <SelectTrigger id="patientId">
                        <SelectValue placeholder="Seleccione un paciente" />
                    </SelectTrigger>
                    <SelectContent>
                        {patients.map((patient, index) => (
-                           <SelectItem key={index} value={`${patient.firstName} ${patient.lastName}`}>
-                               {patient.firstName} {patient.lastName}
+                           <SelectItem key={index} value={patient.id}>
+                               {patient.firstName} {patient.lastName} ({patient.dui})
+
                            </SelectItem>
                        ))}
                    </SelectContent>
@@ -770,7 +780,7 @@ function VaccineRegistrationForm({vaccinationScheme, patients, onVaccineRegister
                  <SelectContent>
                      {vaccinationScheme.map((vaccine, index) => (
                          <SelectItem key={vaccine.vaccine} value={vaccine.vaccine}>{vaccine.vaccine}</SelectItem>
-                     ))}
+                      ))}
                   </SelectContent>
              </Select>
          </div>
@@ -988,8 +998,9 @@ function Home() {
    };
 
   const handleVaccineRegistered = (newVaccination: any) => {
+       addVaccination(newVaccination);
       setVaccinations(prevVaccinations => [...prevVaccinations, newVaccination]);
-
+      
       // Update the patient's vaccination history
       setPatients(prevPatients => {
           return prevPatients.map(patient => {
@@ -1098,13 +1109,15 @@ function Home() {
     };
 
   // Function to add a new vaccine
-  const handleVaccineAdded = (newVaccine: VaccineData) => {
+  const handleVaccineAdded = async (newVaccine: VaccineData) => {
+      await addVaccineToScheme(newVaccine)
     setVaccinationScheme(prevScheme => [...prevScheme, newVaccine]);
     setOpenAddVaccine(false);
-  };
+  }
 
   // Function to update a vaccine
   const handleVaccineUpdatedScheme = (updatedVaccine: VaccineData) => {
+      console.log("handleVaccineAddedScheme function called", updatedVaccine);
     setVaccinationScheme(prevScheme =>
       prevScheme.map(vaccine =>
         vaccine.ageStage === selectedVaccine?.ageStage ? updatedVaccine : vaccine
@@ -1115,6 +1128,7 @@ function Home() {
   };
 
     const handleVaccineDeletedScheme = (vaccineToDelete: VaccineData) => {
+        console.log("handleVaccineDeletedScheme function called", vaccineToDelete);
         setVaccinationScheme(prevScheme =>
             prevScheme.filter(vaccine => vaccine !== vaccineToDelete)
         );
