@@ -142,7 +142,7 @@ const MENU_ITEMS = [
 ];
 
 // Add Patient Form Component
-function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => void }) {
+function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatientAdded: (patient: any) => void }) {
   const { toast } = useToast();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -211,6 +211,7 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
     }
 
 
+
     const duiValidationResult = await validateDui(dui);
     if (!duiValidationResult.isValid) {
       toast({
@@ -221,10 +222,22 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
       return;
     }
 
+      // Check if a patient with the same DUI already exists
+        const existingPatient = patients.find(p => p.dui === dui);
+        if (existingPatient) {
+            toast({
+                title: "Error",
+                description: "Ya existe un paciente registrado con este DUI.",
+                variant: "destructive",
+            });
+            return; // Prevent adding the patient
+        }
+    
     // Create patient object
     const patientData = {
       firstName,
       lastName,
+      
       dui,
       dob,
       phone,
@@ -232,7 +245,7 @@ function AddPatientForm({ onPatientAdded }: { onPatientAdded: (patient: any) => 
       vaccinations: [], // Initialize with an empty array for vaccinations
     };
 
-    onPatientAdded(patientData);
+      onPatientAdded(patientData);
 
     toast({
       title: "Éxito",
@@ -1095,8 +1108,8 @@ export default function Home() {
     switch (selectedMenu) {
       case 'Inicio':
         return <p>¡Bienvenido a la aplicación VacunaciónES!</p>;
-      case 'Agregar Paciente':
-        return <AddPatientForm onPatientAdded={handlePatientAdded} />;
+        case 'Agregar Paciente':
+            return <AddPatientForm patients={patients} onPatientAdded={handlePatientAdded} />;
       case 'Buscar Paciente':
         return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} onDeleteVaccine={handleDeleteVaccine} setSearchResults={setSearchResults} />;
       case 'Registro de Vacuna':
