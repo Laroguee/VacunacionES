@@ -4,10 +4,15 @@ import { collection, getDocs, addDoc, query, where, doc, updateDoc, deleteDoc } 
 const patientsCollection = collection(db, 'patients');
 const vaccinesCollection = collection(db, 'vaccines');
 
-export const getAllPatients = async () => {
-  const snapshot = await getDocs(patientsCollection);
-  const patients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  return patients;
+export const getAllPatients = async () => {  
+    try {
+      const snapshot = await getDocs(patientsCollection);
+      const patients = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return patients;
+    } catch (error) {
+      console.error("Error in getAllPatients:", error);
+      throw error;
+    }
 };
 
 export const addPatient = async (patientData: any) => {

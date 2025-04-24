@@ -971,6 +971,7 @@ function Home() {
     useEffect(() => {
         const fetchPatients = async () => {
             try {
+                console.log("fetchPatients function called")
                 const patientsData = await getAllPatients();
                 setPatients(patientsData);
             } catch (error) {
@@ -979,6 +980,7 @@ function Home() {
         };
 
         fetchPatients();
+        console.log("setPatients function: ", patients)
     }, []); 
 
     const handlePatientAdded = async (newPatient: any, toast: any) => {
@@ -1077,7 +1079,7 @@ function Home() {
      };
     const handleDeleteVaccine = (vaccinationToDelete: any) => {
         // Update vaccinations state
-        setVaccinations(prevVaccinations =>
+           setVaccinations(prevVaccinations =>
             prevVaccinations.filter(vaccination => vaccination !== vaccinationToDelete)
         );
 
@@ -1137,6 +1139,7 @@ function Home() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
   const renderContent = () => {
+      
     switch (selectedMenu) {
       case 'Inicio':
         return <p>¡Bienvenido a la aplicación VacunaciónES!</p>;
