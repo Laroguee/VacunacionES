@@ -1,5 +1,5 @@
 'use client'
-
+import { getAllPatients, addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import {
@@ -29,7 +29,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { validateDui } from "@/services/dui-validator";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -60,6 +59,7 @@ import {
 } from "@/components/ui/select"
 import html2canvas from 'html2canvas';
 
+import { Label } from "@/components/ui/label"; 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -222,22 +222,12 @@ function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatie
       return;
     }
 
-      // Check if a patient with the same DUI already exists
-        const existingPatient = patients.find(p => p.dui === dui);
-        if (existingPatient) {
-            toast({
-                title: "Error",
-                description: "Ya existe un paciente registrado con este DUI.",
-                variant: "destructive",
-            });
-            return; // Prevent adding the patient
-        }
     
     // Create patient object
     const patientData = {
       firstName,
       lastName,
-      
+
       dui,
       dob,
       phone,
@@ -305,6 +295,7 @@ function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatie
 
 // Search Patient Form Component
 function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccineUpdated, onDeleteVaccine, setSearchResults }: { patients: any[], vaccinations: any[], onPatientUpdated: (patient: any) => void, onVaccineUpdated: (vaccination: any) => void, onDeleteVaccine: (vaccination: any) => void, setSearchResults: React.Dispatch<React.SetStateAction<any[]>> }) {
+    console.log("SearchPatientForm: patients prop received:", patients);
     const [searchName, setSearchName] = useState("");
     const [searchDUI, setSearchDUI] = useState("");
     const { toast } = useToast();
@@ -366,6 +357,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault();
+         console.log("SearchPatientForm: handleSubmit called");
 
         if (!searchName && !searchDUI) {
             toast({
@@ -386,7 +378,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
             return { ...patient, vaccinations: patientVaccinations };
         });
 
-
+        console.log("SearchPatientForm: filtering result",results);
         setSearchResults(results);
         setSearchResultsLocal(results);
 
@@ -923,10 +915,11 @@ function EditVaccineDialog({ vaccineData, onVaccineUpdated, onCancel }: { vaccin
   );
 }
 
-export default function Home() {
+function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState('Inicio');
   const router = useRouter();
+    const { toast } = useToast();
   const [patients, setPatients] = useState<any[]>([
     // { firstName: 'John', lastName: 'Doe', dui: '12345678-9', dob: '2000-01-01', phone: '1234-5678', address: 'Some Address', vaccinations: [] } //Example
   ]);
@@ -965,8 +958,33 @@ export default function Home() {
     setSelectedMenu(menuName);
   };
 
-   const handlePatientAdded = (newPatient: any) => {
-       setPatients(prevPatients => [...prevPatients, newPatient]);
+    useEffect(() => {
+        const fetchPatients = async () => {
+            try {
+                const patientsData = await getAllPatients();
+                setPatients(patientsData);
+            } catch (error) {
+                console.error("Error fetching patients:", error);
+            }
+        };
+
+        fetchPatients();
+    }, []); 
+
+    const handlePatientAdded = async (newPatient: any, toast: any) => {
+       const isDuplicate = await checkDuplicateDUI(newPatient.dui);
+       console.log("handlePatientAdded: isDuplicate value: ",isDuplicate)
+       if (isDuplicate) {
+            toast({
+                title: "Error",
+                description: "Ya existe un paciente registrado con este DUI en la base de datos."
+            });
+           return;
+        }
+       
+       // Add the new patient to Firebase
+       const addedPatient = await addPatient(newPatient);
+       setPatients(prevPatients => [...prevPatients, addedPatient]);
    };
 
   const handleVaccineRegistered = (newVaccination: any) => {
@@ -1109,7 +1127,7 @@ export default function Home() {
       case 'Inicio':
         return <p>¡Bienvenido a la aplicación VacunaciónES!</p>;
         case 'Agregar Paciente':
-            return <AddPatientForm patients={patients} onPatientAdded={handlePatientAdded} />;
+            return <AddPatientForm patients={patients} onPatientAdded={(patient) => handlePatientAdded(patient, toast)} />;
       case 'Buscar Paciente':
         return <SearchPatientForm patients={patients} vaccinations={vaccinations} onPatientUpdated={handlePatientUpdated} onVaccineUpdated={handleVaccineUpdated} onDeleteVaccine={handleDeleteVaccine} setSearchResults={setSearchResults} />;
       case 'Registro de Vacuna':
@@ -1260,3 +1278,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
+export default Home;
