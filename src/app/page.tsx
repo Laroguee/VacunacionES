@@ -1,6 +1,6 @@
 'use client'
 import { SidebarMenu } from '@/components/ui/sidebar';
-import { updatePatientVaccination, getAllVaccinations } from '@/services/vaccination-service';
+import {  updatePatientVaccinationField } from '@/services/vaccination-service';
 import { getAllPatients, addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
 
 import { addVaccineToScheme } from '@/services/vaccine-service';
@@ -733,7 +733,7 @@ function VaccineRegistrationForm({ vaccinationScheme, patients, onVaccineRegiste
             observation: observation,
         };
         try {
-            await updatePatientVaccination(patientId, vaccinationData);
+            await updatePatientVaccinationField(patientId, vaccinationData);
             
             toast({
                 title: "Éxito",
@@ -978,33 +978,20 @@ function Home() {
             try {
                 console.log("fetchPatients function called")
 
-                const vaccinationsData = await getAllVaccinations();
-                setVaccinations(vaccinationsData);
-
                 const patientsData = await getAllPatients();
 
                 const patientsWithVaccinations = patientsData.map(patient => {
-                  // Find vaccinations in the new format (vaccinations collection)
-                  const newVaccinations = vaccinationsData.filter(vaccination => vaccination.patientId === patient.id);
-            
                   // Check if the patient also has old-style vaccinations in their document
                   const oldVaccinations = patient.vaccinations || [];
-            
-                  // Combine the two arrays
-                  let combinedVaccinations = [...newVaccinations];
-            
-                  // If there are old vaccinations and they are not already in newVaccinations, add them
-                  oldVaccinations.forEach(oldVaccination => {
-                      if (!newVaccinations.find(nv => nv.vaccineType === oldVaccination.vaccineType && nv.vaccineDate === oldVaccination.vaccineDate)) {
-                          combinedVaccinations.push(oldVaccination);
-                      }
-                  });
-            
+                  
+                  //Add the oldVaccinations array to the new combinedVaccinations array.
+                  let combinedVaccinations = [...oldVaccinations];
                   return { ...patient, vaccinations: combinedVaccinations };
                 });
                 setPatients(patientsWithVaccinations);
-                setSearchResults(patientsWithVaccinations)
-
+                setSearchResults(patientsWithVaccinations);
+                setVaccinations([])
+                
             } catch (error) {
                 console.error("Error fetching patients:", error);
             }
@@ -1030,10 +1017,10 @@ function Home() {
        setPatients(prevPatients => [...prevPatients, addedPatient]);
    };
 
-  const handleVaccineRegistered = (newVaccination: any) => {
-       addVaccination(newVaccination);
-      setVaccinations(prevVaccinations => [...prevVaccinations, newVaccination]);
-      
+ const handleVaccineRegistered = async (newVaccination: any) => {
+        try{
+            await updatePatientVaccinationField(newVaccination.patientId, newVaccination);
+
       // Update the patient's vaccination history
       setPatients(prevPatients => {
           return prevPatients.map(patient => {
@@ -1046,6 +1033,19 @@ function Home() {
               return patient;
           });
       });
+             toast({
+                title: "Éxito",
+                description: "Vacuna registrada correctamente.",
+            });
+        }catch(error){
+            toast({
+                title: "Error",
+                description: "Error al registrar la vacuna.",
+                variant: "destructive",
+            });
+            console.error("Error registering vaccine:", error);
+        }
+
   };
 
     // Function to update a patient

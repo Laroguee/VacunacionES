@@ -1,22 +1,14 @@
 import { db } from '@/firebase';
-import { doc,  collection, getDocs, addDoc} from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion} from 'firebase/firestore';
 
-export const updatePatientVaccination = async (patientId: string, vaccination: any) => {
+export const updatePatientVaccinationField = async (patientId: string, vaccination: any) => {
     try {
-        const vaccinationsCollection = collection(db, 'vaccinations');
-        const newVaccination = {
-            ...vaccination,
-            patientId: patientId
-        };
-        await addDoc(vaccinationsCollection, newVaccination);
+        const patientRef = doc(db, 'patients', patientId);
+        await updateDoc(patientRef, {
+            vaccinations: arrayUnion(vaccination)
+        });
     } catch (error) {
-        console.error("Error adding vaccination:", error);
+        console.error("Error adding vaccination to patient:", error);
         throw error;
     }
-};
-
-export const getAllVaccinations = async () => {
-    const vaccinationsCollection = collection(db, 'vaccinations');
-    const snapshot = await getDocs(vaccinationsCollection);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
