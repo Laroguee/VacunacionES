@@ -1,7 +1,8 @@
 'use client'
 import { SidebarMenu } from '@/components/ui/sidebar';
-import { updatePatientVaccination } from '@/services/vaccination-service';
+import { updatePatientVaccination, getAllVaccinations } from '@/services/vaccination-service';
 import { getAllPatients, addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
+
 import { addVaccineToScheme } from '@/services/vaccine-service';
 import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
@@ -375,11 +376,6 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
             (searchDUI && patient.dui === searchDUI)
         );
 
-        // Add vaccination data to the search results
-        results = results.map(patient => {
-            const patientVaccinations = vaccinations.filter(vaccination => vaccination.patientDUI === patient.dui);
-            return { ...patient, vaccinations: patientVaccinations };
-        });
 
         console.log("SearchPatientForm: filtering result",results);
         setSearchResults(results);
@@ -578,6 +574,15 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                         <p><strong>Fecha de Nacimiento:</strong> {patient.dob}, <strong>Teléfono:</strong> {patient.phone}, <strong>Dirección:</strong> {patient.address}</p>
                                     </>
                                 )}
+                                  {!patient.vaccinations || patient.vaccinations.length === 0 ? (
+                                      <div className="text-gray-500 mt-2">
+                                          No hay vacunas registradas.
+                                      </div>
+                                  ) : (
+                                      <h4 className="text-lg font-bold mt-2">
+                                          Historial de Vacunación:
+                                      </h4>
+                                  )}
 
 
                                 <div id={`vaccination-history-${patient.dui}`}>
@@ -972,8 +977,34 @@ function Home() {
         const fetchPatients = async () => {
             try {
                 console.log("fetchPatients function called")
+
+                const vaccinationsData = await getAllVaccinations();
+                setVaccinations(vaccinationsData);
+
                 const patientsData = await getAllPatients();
-                setPatients(patientsData);
+
+                const patientsWithVaccinations = patientsData.map(patient => {
+                  // Find vaccinations in the new format (vaccinations collection)
+                  const newVaccinations = vaccinationsData.filter(vaccination => vaccination.patientId === patient.id);
+            
+                  // Check if the patient also has old-style vaccinations in their document
+                  const oldVaccinations = patient.vaccinations || [];
+            
+                  // Combine the two arrays
+                  let combinedVaccinations = [...newVaccinations];
+            
+                  // If there are old vaccinations and they are not already in newVaccinations, add them
+                  oldVaccinations.forEach(oldVaccination => {
+                      if (!newVaccinations.find(nv => nv.vaccineType === oldVaccination.vaccineType && nv.vaccineDate === oldVaccination.vaccineDate)) {
+                          combinedVaccinations.push(oldVaccination);
+                      }
+                  });
+            
+                  return { ...patient, vaccinations: combinedVaccinations };
+                });
+                setPatients(patientsWithVaccinations);
+                setSearchResults(patientsWithVaccinations)
+
             } catch (error) {
                 console.error("Error fetching patients:", error);
             }
