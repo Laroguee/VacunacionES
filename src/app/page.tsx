@@ -1,10 +1,12 @@
 'use client'
 import { SidebarMenu } from '@/components/ui/sidebar';
 import {  updatePatientVaccinationField } from '@/services/vaccination-service';
-import { getAllPatients, addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
+import { addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
 
 import { addVaccineToScheme } from '@/services/vaccine-service';
+import { db } from '@/firebase';
 import { useState, useEffect } from "react";
+import { collection, onSnapshot } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { 
   Sidebar,
@@ -602,7 +604,9 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
-                                                    {patient.vaccinations.map((vaccination, vacIndex) => (
+                                                    {patient.vaccinations
+                                                        .filter(vaccination => vaccination.vaccineType)
+                                                        .map((vaccination, vacIndex) => (
                                                         <TableRow key={vacIndex}>
                                                             <TableCell>{vacIndex + 1}</TableCell>
                                                             {editingVaccine === vaccination.vaccineType ? (
@@ -936,10 +940,11 @@ function Home() {
   const router = useRouter();
     const { toast } = useToast();
   const [patients, setPatients] = useState<any[]>([
-    // { firstName: 'John', lastName: 'Doe', dui: '12345678-9', dob: '2000-01-01', phone: '1234-5678', address: 'Some Address', vaccinations: [] } //Example
   ]);
   const [vaccinations, setVaccinations] = useState<any[]>([])
   const [vaccinationScheme, setVaccinationScheme] = useState<VaccineData[]>([
+
+    //Initial state
     { ageStage: 'Recién Nacidos/as', vaccine: 'BCG, HB (Hepatitis B)' },
     { ageStage: '2, 4 y 6 meses', vaccine: 'Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente' },
     { ageStage: '12 meses', vaccine: 'Triple viral tipo SPR, Refuerzo de Neumococo 13 Valente' },
@@ -974,31 +979,31 @@ function Home() {
   };
 
     useEffect(() => {
-        const fetchPatients = async () => {
-            try {
-                console.log("fetchPatients function called")
-
-                const patientsData = await getAllPatients();
-
+        const unsubscribe = () => {
+            const patientsCollectionRef = collection(db, "patients");
+            return onSnapshot(patientsCollectionRef, (snapshot) => {
+                const patientsData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                })) as any[];
                 const patientsWithVaccinations = patientsData.map(patient => {
-                  // Check if the patient also has old-style vaccinations in their document
-                  const oldVaccinations = patient.vaccinations || [];
-                  
-                  //Add the oldVaccinations array to the new combinedVaccinations array.
-                  let combinedVaccinations = [...oldVaccinations];
-                  return { ...patient, vaccinations: combinedVaccinations };
+                    const oldVaccinations = patient.vaccinations || [];
+                    let combinedVaccinations = [...oldVaccinations];
+                    return { ...patient, vaccinations: combinedVaccinations };
                 });
                 setPatients(patientsWithVaccinations);
                 setSearchResults(patientsWithVaccinations);
-                setVaccinations([])
-                
-            } catch (error) {
-                console.error("Error fetching patients:", error);
-            }
+                setVaccinations([]);
+            });
         };
+        
+            try {
+                const unsub = unsubscribe();
+                return () => unsub();
 
-        fetchPatients();
-        console.log("setPatients function: ", patients)
+            } catch (error) {
+                console.error("Error subscribing to patients:", error);
+            }
     }, []); 
 
     const handlePatientAdded = async (newPatient: any, toast: any) => {
