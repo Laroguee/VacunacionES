@@ -22,21 +22,28 @@ const ListPatient: React.FC<ListPatientProps> = ({ patients, onVaccineRegistered
     const [showVaccinations, setShowVaccinations] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<PatientData | null>(null);
 
+    
     const handleShowVaccinations = (patient: PatientData) => {
         setSelectedPatient(patient);
         setShowVaccinations(true);
     };
-    
+
     const handleCloseVaccinations = () => {
         setShowVaccinations(false);
         setSelectedPatient(null);
     }
+
+    const uniquePatients = new Set<string>();
+    const patientsWithoutDuplicates = patients.filter((patient) => {
+        if (uniquePatients.has(patient.dui)) return false;
+        uniquePatients.add(patient.dui);
+        return true;
+    });
     return (
         <div>
             <h2 className="text-2xl font-bold mb-4">Listado de Pacientes</h2>
-            <ul className="space-y-4">
-                {patients.map(patient => (
-                    <li key={patient.id} className="border p-4 rounded-md">
+            <ul className="space-y-4">{patientsWithoutDuplicates.map(patient => (
+                <li key={patient.id} className="border p-4 rounded-md">
                         <div className="flex justify-between items-center">
                             <h3 className="text-lg font-semibold">{patient.name}</h3>
                             <Button onClick={() => handleShowVaccinations(patient)}>Ver Vacunas</Button>
@@ -45,7 +52,7 @@ const ListPatient: React.FC<ListPatientProps> = ({ patients, onVaccineRegistered
                         <p>Teléfono: {patient.cellphone}</p>
                     </li>
                 ))}
-            </ul>
+            </ul>            
             {showVaccinations && selectedPatient && selectedPatient.vaccinations && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-8 rounded-md relative">

@@ -156,6 +156,8 @@ function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatie
   const [dob, setDob] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [tutorName, setTutorName] = useState("");
+  const [tutorRelationship, setTutorRelationship] = useState("");
 
    const [firstNameError, setFirstNameError] = useState("");
    const [lastNameError, setLastNameError] = useState("");
@@ -212,17 +214,23 @@ function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatie
         setAddressError("");
     }
 
+
     if (hasErrors) {
         return;
     }
 
 
 
-    const duiValidationResult = await validateDui(dui);
-    if (!duiValidationResult.isValid) {
+    const duiValidationResult = validateDui(dui);
+
+    if (duiValidationResult.then) {
+        (await duiValidationResult).isValid || (duiValidationResult.isValid = false)
+    }
+
+    if (duiValidationResult.isValid === false) {
       toast({
         title: "Error",
-        description: duiValidationResult.errorMessage || "DUI inválido",
+        description: (duiValidationResult as any).errorMessage || "DUI inválido",
         variant: "destructive",
       });
       return;
@@ -240,7 +248,15 @@ function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatie
       address,
       vaccinations: [], // Initialize with an empty array for vaccinations
     };
+      // Conditionally add tutorInfo if both tutorName and tutorRelationship have values
+    if (tutorName && tutorRelationship) {
+          patientData.tutorInfo = {
+              name: tutorName,
+              relationship: tutorRelationship
+          };
+    }
 
+      
       onPatientAdded(patientData);
 
     toast({
@@ -255,6 +271,8 @@ function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatie
     setDob("");
     setPhone("");
     setAddress("");
+      setTutorName("");
+      setTutorRelationship("");
   };
 
   return (
@@ -289,6 +307,16 @@ function AddPatientForm({ patients, onPatientAdded }: { patients: any[], onPatie
         <div>
           <Label htmlFor="address">Dirección</Label>
           <Input type="text" id="address" placeholder="Dirección" value={address} onChange={(e) => setAddress(e.target.value)}/>
+           {addressError && <p className="text-red-500 text-xs">{addressError}</p>}
+        </div>
+          <div>
+              <Label htmlFor="tutorName">Nombre del Tutor Legal (Opcional)</Label>
+              <Input type="text" id="tutorName" placeholder="Nombre del Tutor Legal" value={tutorName} onChange={(e) => setTutorName(e.target.value)}/>
+           {addressError && <p className="text-red-500 text-xs">{addressError}</p>}
+          </div>
+        <div>
+          <Label htmlFor="tutorRelationship">Parentesco con el Paciente (Opcional)</Label>
+          <Input type="text" id="tutorRelationship" placeholder="Parentesco con el Paciente" value={tutorRelationship} onChange={(e) => setTutorRelationship(e.target.value)}/>
            {addressError && <p className="text-red-500 text-xs">{addressError}</p>}
         </div>
         <div className="md:col-span-2">
@@ -574,6 +602,11 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
                                             </div>
                                         </div>
                                         <p><strong>Fecha de Nacimiento:</strong> {patient.dob}, <strong>Teléfono:</strong> {patient.phone}, <strong>Dirección:</strong> {patient.address}</p>
+                                        {patient.tutorInfo && (
+                                            <p>
+                                                <strong>Tutor:</strong> {patient.tutorInfo.name} ({patient.tutorInfo.relationship})
+                                            </p>
+                                        )}
                                     </>
                                 )}
                                   {!patient.vaccinations || patient.vaccinations.length === 0 ? (
@@ -942,22 +975,14 @@ function Home() {
   const [patients, setPatients] = useState<any[]>([
   ]);
   const [vaccinations, setVaccinations] = useState<any[]>([])
-  const [vaccinationScheme, setVaccinationScheme] = useState<VaccineData[]>([
-
-    //Initial state
-    { ageStage: 'Recién Nacidos/as', vaccine: 'BCG, HB (Hepatitis B)' },
-    { ageStage: '2, 4 y 6 meses', vaccine: 'Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente' },
-    { ageStage: '12 meses', vaccine: 'Triple viral tipo SPR, Refuerzo de Neumococo 13 Valente' },
-    { ageStage: '15 meses', vaccine: 'Hepatitis A, Varicela' },
-    { ageStage: '18 meses', vaccine: 'Hexavalente, Triple viral tipo SPR' },
-    { ageStage: '24 meses', vaccine: 'Hepatitis A' },
-    { ageStage: '4 años', vaccine: 'DPT, Polio oral, Varicela' },
-    { ageStage: 'Niños y Niñas de 9 y 10 años', vaccine: 'VPH Cuadrivalente' },
-    { ageStage: 'Adolescentes y Adultos', vaccine: 'Td (Tétanos y Difteria)' },
-    { ageStage: 'Mujeres Embarazadas', vaccine: 'Tdpa, Td, Influenza Tetravalente' },
-    { ageStage: 'Adultos Mayores, Grupos de Riesgo y Personas con Enfermedades Crónicas', vaccine: 'Td, HB (Hepatitis B), Neumococo 23 Valente, Influenza Tetravalente' },
-    { ageStage: 'Otras Vacunas', vaccine: 'Fiebre Amarilla, Antirrábica Humana, SARS Cov-2' },
-  ]);
+    const [vaccinationScheme, setVaccinationScheme] = useState<VaccineData[]>([
+        {ageStage: 'Recién Nacidos/as', vaccine: 'BCG, HB (Hepatitis B)'},
+        {ageStage: '2, 4 y 6 meses', vaccine: 'Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente'},
+        {ageStage: '12 meses', vaccine: 'Triple viral tipo SPR, Refuerzo de Neumococo 13 Valente'},
+        {ageStage: '15 meses', vaccine: 'Hepatitis A, Varicela'},
+        {ageStage: '18 meses', vaccine: 'Hexavalente, Triple viral tipo SPR'},
+        {ageStage: '24 meses', vaccine: 'Hepatitis A'},
+    ]);
 
   //Add Vaccine State
   const [openAddVaccine, setOpenAddVaccine] = useState(false);
@@ -977,92 +1002,93 @@ function Home() {
   const handleMenuSelect = (menuName: string) => {
     setSelectedMenu(menuName);
   };
-
+  
     useEffect(() => {
-        const unsubscribe = () => {
-            const patientsCollectionRef = collection(db, "patients");
-            return onSnapshot(patientsCollectionRef, (snapshot) => {
-                const patientsData = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                })) as any[];
-                const patientsWithVaccinations = patientsData.map(patient => {
-                    const oldVaccinations = patient.vaccinations || [];
-                    let combinedVaccinations = [...oldVaccinations];
-                    return { ...patient, vaccinations: combinedVaccinations };
-                });
-                setPatients(patientsWithVaccinations);
-                setSearchResults(patientsWithVaccinations);
-                setVaccinations([]);
+        const patientsCollectionRef = collection(db, "patients");
+        const unsubscribe = onSnapshot(patientsCollectionRef, (snapshot) => {
+            const patientsData = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            })) as any[];
+            const patientsWithVaccinations = patientsData.map((patient) => {
+                const patientWithVaccinations = { ...patient };
+                return patientWithVaccinations;
             });
-        };
-        
-            try {
-                const unsub = unsubscribe();
-                return () => unsub();
+            setPatients(patientsWithVaccinations);
+            setSearchResults(patientsWithVaccinations);
+            setVaccinations([]);
+        });
+        return unsubscribe;
+    }, [patients.length]);
 
-            } catch (error) {
-                console.error("Error subscribing to patients:", error);
-            }
-    }, []); 
-
-    const handlePatientAdded = async (newPatient: any, toast: any) => {
-       const isDuplicate = await checkDuplicateDUI(newPatient.dui);
-       console.log("handlePatientAdded: isDuplicate value: ",isDuplicate)
-       if (isDuplicate) {
-            toast({
-                title: "Error",
-                description: "Ya existe un paciente registrado con este DUI en la base de datos."
-            });
-           return;
-        }
-       
-       // Add the new patient to Firebase
-       const addedPatient = await addPatient(newPatient);
-       setPatients(prevPatients => [...prevPatients, addedPatient]);
-   };
-
- const handleVaccineRegistered = async (newVaccination: any) => {
-        try{
-            await updatePatientVaccinationField(newVaccination.patientId, newVaccination);
-
-      // Update the patient's vaccination history
-      setPatients(prevPatients => {
-          return prevPatients.map(patient => {
-              if (patient.dui === newVaccination.patientDUI) {
-                  return {
-                      ...patient,
-                      vaccinations: [...(patient.vaccinations || []), newVaccination]
-                  };
-              }
-              return patient;
-          });
-      });
+        const handlePatientAdded = async (newPatient: any, toast: any) => {
+        const isDuplicate = await checkDuplicateDUI(newPatient.dui);
+        console.log("handlePatientAdded: isDuplicate value: ",isDuplicate)
+        if (isDuplicate) {
              toast({
-                title: "Éxito",
-                description: "Vacuna registrada correctamente.",
-            });
-        }catch(error){
-            toast({
-                title: "Error",
-                description: "Error al registrar la vacuna.",
-                variant: "destructive",
-            });
-            console.error("Error registering vaccine:", error);
-        }
+                 title: "Error",
+                 description: "Ya existe un paciente registrado con este DUI en la base de datos."
+             });
+            return;
+         }
+        
+        // Add the new patient to Firebase
+        const addedPatient = await addPatient(newPatient);
+        setPatients(prevPatients => [...prevPatients, addedPatient]);
+    };
 
-  };
+    const handleVaccineRegistered = async (newVaccination: any) => {
+           try{
+               const patient = patients.find((patient)=> patient.id === newVaccination.patientId);
+                if (!patient) {
+                   throw new Error("Patient not found");
+                }
+                 newVaccination.patientDUI = patient.dui;
+               await updatePatientVaccinationField(newVaccination.patientId, newVaccination );
 
-    // Function to update a patient
+         // Update the patient's vaccination history
+         setPatients(prevPatients => {
+             return prevPatients.map(patient => {
+                 if (patient.dui === newVaccination.patientDUI) {
+                     return {
+                         ...patient,
+                         vaccinations: [...(patient.vaccinations || []), {...newVaccination}]
+                     };
+                 }
+                 return patient;
+             });
+         });
+                toast({
+                   title: "Éxito",
+                   description: "Vacuna registrada correctamente.",
+               });
+           }catch(error){
+               toast({
+                   title: "Error",
+                   description: "Error al registrar la vacuna.",
+                   variant: "destructive",
+               });
+               console.error("Error registering vaccine:", error);
+           }
+
+     };
+
+       // Function to update a patient
     const handlePatientUpdated = (updatedPatient: any) => {
         setPatients(prevPatients => {
-            return prevPatients.map(patient => {
+            const updatedPatients = prevPatients.map(patient => {
                 if (patient.dui === updatedPatient.dui) {
-                    return updatedPatient;
+                    return updatedPatient; 
                 }
-                return patient;
+                return patient; 
             });
+            //filter patients by DUI, to remove duplicated and keep only the first one
+            const filteredPatients = updatedPatients.filter((patient:any, index:number, self:any) =>
+                index === self.findIndex((p) => p.dui === patient.dui)
+            );
+            return [...filteredPatients];
         });
+
         setSearchResults(prevResults => {
             return prevResults.map(result => {
                 if (result.dui === updatedPatient.dui) {
@@ -1071,6 +1097,7 @@ function Home() {
                 return result;
             });
         });
+
     };
 
      const handleVaccineUpdated = (updatedVaccination: any) => {
@@ -1114,6 +1141,7 @@ function Home() {
          });
      };
     const handleDeleteVaccine = (vaccinationToDelete: any) => {
+      
         // Update vaccinations state
            setVaccinations(prevVaccinations =>
             prevVaccinations.filter(vaccination => vaccination !== vaccinationToDelete)
