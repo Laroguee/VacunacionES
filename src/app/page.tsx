@@ -977,11 +977,24 @@ function Home() {
   const [vaccinations, setVaccinations] = useState<any[]>([])
     const [vaccinationScheme, setVaccinationScheme] = useState<VaccineData[]>([
         {ageStage: 'Recién Nacidos/as', vaccine: 'BCG, HB (Hepatitis B)'},
-        {ageStage: '2, 4 y 6 meses', vaccine: 'Pentavalente, Polio mielitis, Rotavirus, Neumococo 13 Valente'},
+        {ageStage: '2, 4 y 6 meses', vaccine: 'Pentavalente, Polio mielitis OPVb, Rotavirus, Neumococo 13 Valente'},
         {ageStage: '12 meses', vaccine: 'Triple viral tipo SPR, Refuerzo de Neumococo 13 Valente'},
         {ageStage: '15 meses', vaccine: 'Hepatitis A, Varicela'},
         {ageStage: '18 meses', vaccine: 'Hexavalente, Triple viral tipo SPR'},
         {ageStage: '24 meses', vaccine: 'Hepatitis A'},
+          // Añadiendo las nuevas vacunas al esquema
+         {ageStage: '4 años', vaccine: '2do refuerzo DPT (Difteria, Tosferina y Tétanos)'},
+         {ageStage: '4 años', vaccine: 'Refuerzo OPVb (Polio oral)'},
+         {ageStage: '4 años', vaccine: '2da dosis: Varicela'},
+         {ageStage: 'Niños y Niñas de 9 y 10 años', vaccine: 'VPH Cuadrivalente (Previene el cáncer de cérvix o cuello de matriz, causado por el virus del papiloma humano), 1ra Dosis'},
+         {ageStage: 'Niños y Niñas de 9 y 10 años', vaccine: '2da Dosis 6 meses después de aplicada la primera'},
+         {ageStage: 'Adolescentes y Adultos', vaccine: 'Td (Tétanos y Difteria), Toda persona debe recibir 1 dosis cada 10 años a partir de los 10 años de edad'},
+         {ageStage: 'Mujeres Embarazadas', vaccine: 'Tdpa (Tétanos, Difteria, Tosferina acelular. Aplicar 1 dosis en cada embarazo a partir de las 20 semanas de gestación)'},
+         {ageStage: 'Mujeres Embarazadas', vaccine: 'Td (Tétanos y Difteria) a toda mujer embarazada que no cuente con esquema previo, colocar 4 semanas posterior a la Tdpa'},
+         {ageStage: 'Mujeres Embarazadas', vaccine: 'Influenza Tetravelente (En su primer control del embarazo no importando la edad gestacional)'},
+         {ageStage: 'Adultos Mayores, Grupos de Riesgo y Personas con Enfermedades Crónicas', vaccine: 'Td (Tétanos y Difteria)'},
+         {ageStage: 'Adultos Mayores, Grupos de Riesgo y Personas con Enfermedades Crónicas', vaccine: 'HB (Hepatitis B), Neumococo 23 Valente, Influenza Tetravelente (Niños de 6 meses a 59 meses, personas adultos mayores de 60 años y personal de salud)'},
+         {ageStage: 'Otras Vacunas', vaccine: 'Fiebre Amarilla (Mayores de 1 año y menores de 60 años. Personas que viajen a paises endémicos de Fiebre Amarilla), Antirrábica Humana -Preexposición (personas de riesgo como veterinarios) -Post exposición (Según Lineamiento Nacional Vigente), SARS Cov-2 (Población en general a partir de los 5 años de edad. El número de dosis e intervalo varía según la recomendación del tipo de vacuna)'},
     ]);
 
   //Add Vaccine State
