@@ -5,7 +5,7 @@ import {  updatePatientVaccinationField } from '@/services/vaccination-service';
 import { addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
 
 import { addVaccineToScheme } from '@/services/vaccine-service';
-import { db } from '@/firebase';
+import { db } from "../firebase";
 import { useState, useEffect } from "react";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { orderBy, query, limit } from "firebase/firestore";
@@ -21,6 +21,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarGroupLabel,
+
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
 import {
@@ -65,21 +66,50 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import html2canvas from 'html2canvas';
-
+import { doc, getDoc } from 'firebase/firestore';
 import { Label } from "@/components/ui/label"; 
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [healthCenters, setHealthCenters] = useState<any[]>([]);
+  const [selectedHealthCenter, setSelectedHealthCenter] = useState("");
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // Placeholder for actual authentication logic
-    if (username === "doctor" && password === "password") {
-      onLogin();
-    } else {
+
+    if (!selectedHealthCenter) {
+      alert("Por favor, seleccione un centro de salud");
+      return;
+    }
+
+    const docRef = doc(db, "health_center", selectedHealthCenter); 
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      if (docSnap.data()?.user === username && docSnap.data()?.password === password) {
+        onLogin();
+      } else {
       alert("Credenciales inválidas");
+      }
+
+
     }
   };
+
+  useEffect(() => {
+    const healthCentersCollectionRef = collection(db, "health_center");
+    const unsubscribe = onSnapshot(healthCentersCollectionRef, (snapshot) => {
+      const centersData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name_CS: doc.data().name_CS,
+          user: doc.data().user,
+        ...doc.data(),
+      }));
+      setHealthCenters(centersData);
+    });
+
+    return unsubscribe;
+  }, []);
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -124,6 +154,25 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+          </div>
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="centroDeSalud"
+            >
+              Centro de Salud
+            </label>
+            <select
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="centroDeSalud"
+              required
+        onChange={(e) => setSelectedHealthCenter(e.target.value)}
+            >
+              <option value="">Seleccione un centro</option>
+              {healthCenters.map((center) => (
+                <option key={center.id} value={center.id}>{center.name_CS}</option>
+              ))}
+            </select>
           </div>
           <div className="flex items-center justify-between">
             <button

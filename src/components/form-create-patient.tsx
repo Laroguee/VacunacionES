@@ -17,7 +17,7 @@ const FormCreatePatient: React.FC<FormCreatePatientProps> = ({ onPatientCreated 
     const [tutorRelationship, setTutorRelationship] = useState('');    
     const [duiError, setDuiError] = useState('');
 
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         if (!isValidDUI(dui)) {
             setDuiError('DUI inválido');
             return;

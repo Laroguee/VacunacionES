@@ -6,9 +6,15 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }*/
 
-    // Deny access for all other documents
+    // Allow read and write access to all other documents (for development purposes)
     match /{document=**} {
       allow read, write: if true;
+    }
+    
+    // Allow read to all and create only for users who has the role admin in health_center collection
+    match /health_center/{any} {
+      allow read;
+      allow create: if request.auth.token.admin == true;
     }
   }
 }
