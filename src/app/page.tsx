@@ -1,4 +1,5 @@
 'use client'
+import { useRouter } from 'next/navigation';
 import { SidebarMenu } from '@/components/ui/sidebar';
 import {  updatePatientVaccinationField } from '@/services/vaccination-service';
 import { addPatient, checkDuplicateDUI, updatePatient } from '@/services/patient-service';
@@ -7,7 +8,7 @@ import { addVaccineToScheme } from '@/services/vaccine-service';
 import { db } from '@/firebase';
 import { useState, useEffect } from "react";
 import { collection, onSnapshot } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
+import { orderBy, query, limit } from "firebase/firestore";
 import { 
   Sidebar,
   SidebarContent,
@@ -69,7 +70,6 @@ import { Label } from "@/components/ui/label";
 function LoginForm({ onLogin }: { onLogin: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -969,8 +969,34 @@ function EditVaccineDialog({ vaccineData, onVaccineUpdated, onCancel }: { vaccin
 
 function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [selectedMenu, setSelectedMenu] = useState('Inicio');
-  const router = useRouter();
+ const [selectedMenu, setSelectedMenu] = useState('Inicio');
+ const [recentPatients, setRecentPatients] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (isLoggedIn && selectedMenu === 'Inicio') {
+      const patientsCollectionRef = collection(db, "patients");
+      const q = query(patientsCollectionRef, orderBy("createdAt", "desc"), limit(5));
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const patientsData = snapshot.docs.map((doc) => {
+          const data = doc.data() as any;
+          const createdAt = data.createdAt ? new Date(data.createdAt.seconds * 1000) : null;
+          return {
+            id: doc.id,
+            ...data,
+          };
+        });
+        setRecentPatients(patientsData);
+        console.log("Recent patients fetched:", patientsData);
+
+      }, (error) => {
+        console.error("Error fetching recent patients:", error);
+        // Handle error (e.g., show a toast message)
+      });
+
+      return unsubscribe; // Cleanup the listener on component unmount or when dependencies change
+    }
+  }, [isLoggedIn, selectedMenu]); // Add isLoggedIn and selectedMenu as dependencies
+
     const { toast } = useToast();
   const [patients, setPatients] = useState<any[]>([
   ]);
@@ -1219,7 +1245,18 @@ function Home() {
       
     switch (selectedMenu) {
       case 'Inicio':
-        return <p>¡Bienvenido a la aplicación VacunaciónES!</p>;
+        return (
+          <div className="container mx-auto mt-8">
+            <h2 className="text-2xl font-bold mb-4">¡Bienvenido a la aplicación VacunaciónES!</h2>
+            <h3 className="text-xl font-bold mb-2">Pacientes Registrados Recientemente</h3>
+            <ul>
+              {recentPatients.map((patient, index) => (
+                <li key={index} className="mb-1 p-2 border rounded">
+                  <strong>{patient.firstName} {patient.lastName}</strong> - DUI: {patient.dui}
+                </li>
+              ))}
+            </ul>
+          </div>);
         case 'Agregar Paciente':
             return <AddPatientForm patients={patients} onPatientAdded={(patient) => handlePatientAdded(patient, toast)} />;
       case 'Buscar Paciente':

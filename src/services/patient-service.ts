@@ -1,5 +1,5 @@
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, query, where, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, query, where, doc, updateDoc, deleteDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 const patientsCollection = collection(db, 'patients');
 const vaccinesCollection = collection(db, 'vaccines');
@@ -16,8 +16,12 @@ export const getAllPatients = async () => {
 };
 
 export const addPatient = async (patientData: any) => {
-  const docRef = await addDoc(patientsCollection, patientData);
-  return { id: docRef.id, ...patientData };
+  const patientWithTimestamp = {
+    ...patientData,
+    createdAt: serverTimestamp() // Add the server timestamp
+  };
+  const docRef = await addDoc(patientsCollection, patientWithTimestamp);
+  return { id: docRef.id, ...patientWithTimestamp };
 };
 export const checkDuplicateDUI = async (dui: string) => {
   const q = query(patientsCollection, where("dui", "==", dui));
