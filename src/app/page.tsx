@@ -451,7 +451,7 @@ function SearchPatientForm({ patients, vaccinations, onPatientUpdated, onVaccine
         }
 
         let results = patients.filter(patient =>
-            (searchName && (patient.firstName.toLowerCase().includes(searchName.toLowerCase()) || patient.lastName.toLowerCase().includes(searchName.toLowerCase()))) ||
+            (searchName && ((patient.firstName?.toLowerCase() ?? "").includes(searchName.toLowerCase()) || (patient.lastName?.toLowerCase() ?? "").includes(searchName.toLowerCase()))) ||
             (searchDUI && patient.dui === searchDUI)
         );
 
